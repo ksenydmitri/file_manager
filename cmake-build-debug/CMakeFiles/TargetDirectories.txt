@@ -1,0 +1,3 @@
+/home/kseny_dmitri/tar_working_dir/kurs_osisp/cmake-build-debug/CMakeFiles/kurs_osisp.dir
+/home/kseny_dmitri/tar_working_dir/kurs_osisp/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/kseny_dmitri/tar_working_dir/kurs_osisp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
