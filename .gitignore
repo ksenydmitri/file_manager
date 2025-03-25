@@ -1,0 +1,13 @@
+build/
+*.o
+*.a
+*.so
+*.swp
+*.swo
+.vscode/
+.clion/
+.DS_Store
+cmake-build-*/
+*.log
+*.deb
+*.rpm
