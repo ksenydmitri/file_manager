@@ -24,7 +24,7 @@ typedef struct {
     char source[MAX_PATH_LEN];
     OperationType op_type;
     FileType content_type;
-} Clipboard;  // Добавляем определение Clipboard
+} Clipboard;
 
 typedef struct {
     char path[MAX_PATH_LEN];

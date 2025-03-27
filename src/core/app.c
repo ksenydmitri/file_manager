@@ -4,6 +4,7 @@
 #include "../operations/file_ops.h"
 #include "../config/config.h"
 #include <ncurses.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <string.h>
 

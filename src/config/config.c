@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <color.h>
 
 void config_set_defaults(AppConfig* config) {
     config->theme.dir_color = COLOR_BLUE;
