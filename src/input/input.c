@@ -8,50 +8,54 @@
 #include "input.h"
 
 void handle_input(ApplicationState* state, int key) {
-    Tab* current_tab = &state->tabs[state->active_tab];
-    
+    // Убрали неиспользуемую переменную current_tab
+
     switch(key) {
         // Навигация
         case KEY_UP:
             navigate_up(state);
-            break;
-            
+        break;
+
         case KEY_DOWN:
             navigate_down(state);
-            break;
-            
+        break;
+
         case KEY_LEFT:
             state->active_tab = (state->active_tab > 0) ? state->active_tab - 1 : 0;
-            break;
-            
+        break;
+
         case KEY_RIGHT:
             state->active_tab = (state->active_tab < MAX_TABS-1) ? state->active_tab + 1 : MAX_TABS-1;
-            break;
-            
+        break;
+
         // Действия с файлами
         case 10: // Enter
             enter_directory(state);
-            break;
-            
+        break;
+
         case KEY_BACKSPACE:
             go_back(state);
-            break;
-            
+        break;
+
         case KEY_F(3):
             delete_selected(state);
-            break;
+        break;
 
         case KEY_F(5):
             handle_copy_operation(state);
-            break;
+        break;
 
         case KEY_F(6):
             handle_paste_operation(state);
-            break;
+        break;
 
         case KEY_F(10):
             state->should_exit = 1;
-            break;
+        break;
+
+        default:
+            // Можно добавить обработку неизвестных клавиш
+                break;
     }
 }
 
