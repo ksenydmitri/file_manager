@@ -22,7 +22,7 @@ int dir_create(const char* path) {
 int file_delete(const char* path) {
     if (unlink(path) == -1) {
         char error_msg[MAX_PATH_LEN + 50];
-        snprintf(error_msg, sizeof(error_msg), "Cannot open directory %s", tab->path);
+        snprintf(error_msg, sizeof(error_msg), "Failed to delete file: %s", path);
         error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
         return -1;
     }
@@ -146,7 +146,9 @@ int dir_delete_recursive(const char* path) {
 void load_directory(Tab* tab) {
     DIR* dir = opendir(tab->path);
     if (!dir) {
-        error_handle(ERR_FILE_NOT_FOUND, __FILE__, __LINE__, "Cannot open directory %s", tab->path);
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Cannot open directory %s", tab->path);
+        error_handle(ERR_FILE_NOT_FOUND, __FILE__, __LINE__, error_msg);
         return;
     }
 
@@ -154,8 +156,9 @@ void load_directory(Tab* tab) {
     tab->file_count = 0;
 
     while ((entry = readdir(dir)) && tab->file_count < MAX_FILES_PER_DIR) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
+        }
 
         FileEntry* file = &tab->files[tab->file_count++];
         get_file_info(entry->d_name, file);

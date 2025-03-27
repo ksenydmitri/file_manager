@@ -1,7 +1,7 @@
 #include "dialog.h"
 #include <ncurses.h>
 #include <string.h>
-#include <stbool.h>
+#include <stdbool.h>
 #include <ctype.h>
 
 DialogResult show_dialog(DialogType type, const char* title, const char* message)
@@ -60,7 +60,7 @@ static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result)
     mvwprintw(win, height-2, 10, "Yes (Y) / No (N)");
     wrefresh(win);
 
-    int done = 0;  // Using int instead of bool for wider compatibility
+    int done = 0;
     while (!done) {
         const int ch = wgetch(win);
 
@@ -73,6 +73,10 @@ static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result)
             case 'n':
                 result->confirmed = 0;
                 done = 1;
+                break;
+
+            default:
+                // Ignore other keys - continue waiting for Y/N
                 break;
         }
     }
