@@ -4,12 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <color.h>
+#include <ncurses.h>
 
 void config_set_defaults(AppConfig* config) {
-    config->theme.dir_color = COLOR_BLUE;
-    config->theme.file_color = COLOR_WHITE;
-    config->theme.selected_color = COLOR_REVERSE;
+    // Initialize default color pairs
+    init_pair(1, COLOR_BLUE, COLOR_BLACK);    // Directory color
+    init_pair(2, COLOR_WHITE, COLOR_BLACK);   // File color
+
+    config->theme.dir_color = COLOR_PAIR(1);   // Use color pair 1
+    config->theme.file_color = COLOR_PAIR(2);  // Use color pair 2
+    config->theme.selected_color = A_REVERSE;  // Correct constant for reverse video
     
     config->display.show_hidden = 0;
     config->display.human_readable = 1;

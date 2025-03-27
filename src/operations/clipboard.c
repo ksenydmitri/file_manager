@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "../../include/enums.h"
 #include <sys/wait.h>
 
 void copy_to_clipboard(Clipboard *cb, const char *path, OperationType type) {
     strncpy(cb->source, path, MAX_PATH_LEN-1);
-    cb->type = type;
+    cb->op_type = type;
 }
 
 int paste_from_clipboard(Clipboard *cb, const char *dest) {
@@ -21,5 +22,5 @@ int paste_from_clipboard(Clipboard *cb, const char *dest) {
 
 void clear_clipboard(Clipboard *cb) {
     memset(cb->source, 0, MAX_PATH_LEN);
-    cb->type = OP_COPY;
+    cb->op_type = OP_COPY;
 }

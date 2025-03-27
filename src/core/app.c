@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <string.h>
+#include "../input/input.h"
 
 void app_init(ApplicationState* state) {
     memset(state, 0, sizeof(ApplicationState));

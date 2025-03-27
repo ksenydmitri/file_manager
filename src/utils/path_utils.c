@@ -1,19 +1,22 @@
 #include "path_utils.h"
+#include "../../include/constants.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <stdlib.h>
+#include <libgen.h>
 
 void normalize_path(char *path) {
-    char temp[PATH_MAX];
-    if (realpath(path, temp) {
-        strncpy(path, temp, PATH_MAX);
+    char temp[MAX_PATH_LEN];
+    if (realpath(path, temp)){
+        strncpy(path, temp, MAX_PATH_LEN);
     }
 }
 
 void get_parent_dir(char *path) {
     char *parent = dirname(path);
-    strncpy(path, parent, PATH_MAX);
+    strncpy(path, parent, MAX_PATH_LEN);
 }
 
 int is_valid_path(const char *path) {

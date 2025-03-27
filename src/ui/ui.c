@@ -1,6 +1,8 @@
 #include "ui.h"
 #include "dialog.h"
 #include "../config/config.h"
+#include "../ui/ui.h"
+#include "../../include/types.h"
 #include <ncurses.h>
 #include <string.h>
 
@@ -49,46 +51,40 @@ void ui_handle_resize() {
 
 static void draw_panel(WINDOW* win, const Tab* tab, int is_active) {
     werase(win);
+    int max_y, max_x;
+    getmaxyx(win, max_y, max_x);
 
-    // Заголовок
+    // Draw panel border differently if active
+    if (is_active) {
+        wattron(win, A_BOLD);
+        box(win, 0, 0);
+        wattroff(win, A_BOLD);
+    } else {
+        box(win, 0, 0);
+    }
+
+    // Header
     wattron(win, A_BOLD | COLOR_PAIR(1));
     mvwprintw(win, 0, 2, "%s", tab->path);
     wattroff(win, A_BOLD | COLOR_PAIR(1));
 
-    // Список файлов
-    int max_y, max_x;
-    getmaxyx(win, max_y, max_x);
-
-    for(int i = tab->offset;
-        i < tab->file_count && i < tab->offset + max_y - 2;
-        i++) {
-
+    // File list
+    for(int i = tab->offset; i < tab->file_count && i < tab->offset + max_y - 2; i++) {
         int y_pos = i - tab->offset + 1;
+        int attr = 0;
 
-        if(i == tab->selected) {
-            wattron(win, A_REVERSE);
-        }
+        if(i == tab->selected) attr |= A_REVERSE;
+        if(tab->files[i].type == FILE_DIRECTORY) attr |= COLOR_PAIR(1);
+        else attr |= COLOR_PAIR(2);
 
-        // Тип файла
-        if(tab->files[i].is_dir) {
-            wattron(win, COLOR_PAIR(1));
-            mvwaddch(win, y_pos, 2, 'D');
-        } else {
-            wattron(win, COLOR_PAIR(2));
-            mvwaddch(win, y_pos, 2, 'F');
-        }
-
-        // Имя и размер
-        mvwprintw(win, y_pos, 5, "%-30s %8ld",
+        wattron(win, attr);
+        mvwprintw(win, y_pos, 2, "%c %-30s %8ld",
+                (tab->files[i].type == FILE_DIRECTORY) ? 'D' : 'F',
                 tab->files[i].name,
                 tab->files[i].size);
-
-        if(i == tab->selected) {
-            wattroff(win, A_REVERSE);
-        }
+        wattroff(win, attr);
     }
 
-    box(win, 0, 0);
     wrefresh(win);
 }
 

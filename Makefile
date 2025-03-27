@@ -1,6 +1,6 @@
 # Компилятор и флаги
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude -Isrc/core -Isrc/ui -Isrc/operations -Isrc/utils -Isrc/config -Isrc/error
+CFLAGS = -Wall -Wextra -Iinclude -Isrc/core -Isrc/ui -Isrc/operations -Isrc/utils -Isrc/config -Isrc/error -std=c11
 LDFLAGS = -lncurses
 
 # Директории
@@ -19,7 +19,7 @@ TARGET = $(BIN_DIR)/file_manager
 
 all: $(TARGET)
 
-debug: CFLAGS += -g -DDEBUG
+debug: CFLAGS += -g -DDEBUG -O0
 debug: clean all
 
 $(TARGET): $(OBJECTS)

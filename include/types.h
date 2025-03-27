@@ -4,7 +4,8 @@
 #include <sys/types.h>  // Для off_t, mode_t, uid_t, gid_t
 #include <time.h>       // Для time_t
 #include "enums.h"      // Для FileType, ColorScheme
-#include "config.h"     // Для AppConfig
+#include "../src/config/config.h"
+#include "constants.h"
 
 #define MAX_FILENAME_LEN 256
 #define MAX_PATH_LEN 4096
@@ -34,5 +35,14 @@ typedef struct {
     int offset;
     SortOrder sort_order;
 } Tab;
+
+typedef struct {
+    Tab tabs[MAX_TABS];
+    Clipboard clipboard;
+    AppConfig config;
+    int active_tab;
+    int should_exit;
+    int need_refresh;
+} ApplicationState;
 
 #endif

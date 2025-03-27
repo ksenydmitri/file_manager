@@ -1,12 +1,11 @@
-#include "input.h"
 #include "../operations/file_ops.h"
 #include "../operations/clipboard.h"
 #include "../ui/ui.h"
 #include <ncurses.h>
 #include <signal.h>
 #include <string.h>
-#include "constants.h"
-#include "app.h"
+#include "../../include/constants.h"
+#include "input.h"
 
 void handle_input(ApplicationState* state, int key) {
     Tab* current_tab = &state->tabs[state->active_tab];

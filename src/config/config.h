@@ -1,8 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "../../include/types.h"
-
 #define CONFIG_FILE ".fmrc"
 
 typedef struct {

@@ -1,5 +1,5 @@
 #include "error.h"
-#include "constants.h"
+#include "../../include/constants.h"
 #include "../ui/ui.h"
 #include <string.h>
 #include <time.h>

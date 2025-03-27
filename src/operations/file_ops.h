@@ -1,7 +1,7 @@
 #ifndef FILE_OPS_H
 #define FILE_OPS_H
 
-#include "../include/types.h"
+#include "../../include/types.h"
 #include "../utils/path_utils.h"
 
 // Создание файла
@@ -26,6 +26,6 @@ int get_file_info(const char* path, FileEntry* entry);
 int dir_delete_recursive(const char* path);
 
 
-int load_directory(Tab* tab);
+void load_directory(Tab* tab);
 
 #endif

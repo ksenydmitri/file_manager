@@ -8,15 +8,6 @@
 
 #define APP_VERSION "1.0.0"
 
-typedef struct {
-    Tab tabs[MAX_TABS];
-    Clipboard clipboard;
-    AppConfig config;
-    int active_tab;
-    int should_exit;
-    int need_refresh;
-} ApplicationState;
-
 // Инициализация состояния приложения
 void app_init(ApplicationState* state);
 

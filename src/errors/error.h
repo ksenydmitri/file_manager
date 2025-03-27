@@ -1,13 +1,14 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include "enums.h"
+#include "../../include/enums.h"
 #include <stdarg.h>
+#include "../../include/constants.h"
 
 typedef struct {
     ErrorCode code;
     char message[256];
-    const char* file;
+    char file[MAX_PATH_LEN];
     int line;
 } ErrorInfo;
 
@@ -22,5 +23,7 @@ void error_show_last();
 
 // Получение строкового описания кода ошибки
 const char* error_code_to_string(ErrorCode code);
+
+void show_error_dialog(const char* message);
 
 #endif

@@ -31,7 +31,7 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
             wrefresh(dialog_win);
             
             int ch;
-            while((ch = wgetch(dialog_win)) {
+            while((ch = wgetch(dialog_win))) {
                 if(ch == 'y' || ch == 'Y') {
                     result.confirmed = 1;
                     break;
@@ -64,4 +64,15 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
     
     delwin(dialog_win);
     return result;
+}
+
+void show_error_dialog(const char* message) {
+    WINDOW* win = newwin(5, 60, (LINES-5)/2, (COLS-60)/2);
+    box(win, 0, 0);
+    mvwprintw(win, 1, 2, "Error:");
+    mvwprintw(win, 2, 2, "%.56s", message);
+    mvwprintw(win, 3, 2, "Press any key to continue...");
+    wrefresh(win);
+    getch();
+    delwin(win);
 }

@@ -1,7 +1,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#include "../include/types.h"
+#include "../../include/types.h"
 
 // Типы диалогов
 typedef enum {
