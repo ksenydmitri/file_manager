@@ -1,35 +1,38 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <sys/stat.h>
+#include <sys/types.h>  // Для off_t, mode_t, uid_t, gid_t
+#include <time.h>       // Для time_t
+#include "enums.h"      // Для FileType, ColorScheme
+#include "config.h"     // Для AppConfig
 
-#define MAX_PATH 4096
-#define MAX_FILES 2048
-#define MAX_TABS 5
+#define MAX_FILENAME_LEN 256
+#define MAX_PATH_LEN 4096
+#define MAX_FILES_PER_DIR 4096
 
 typedef struct {
-    char name[256];
-    int is_dir;
+    char name[MAX_FILENAME_LEN];
     off_t size;
     mode_t mode;
+    time_t mtime;
+    uid_t uid;
+    gid_t gid;
+    FileType type;
 } FileEntry;
 
 typedef struct {
-    char path[MAX_PATH];
-    FileEntry files[MAX_FILES];
+    char source[MAX_PATH_LEN];
+    OperationType op_type;
+    FileType content_type;
+} Clipboard;  // Добавляем определение Clipboard
+
+typedef struct {
+    char path[MAX_PATH_LEN];
+    FileEntry files[MAX_FILES_PER_DIR];
     int file_count;
     int selected;
     int offset;
+    SortOrder sort_order;
 } Tab;
-
-typedef enum {
-    OP_COPY,
-    OP_MOVE
-} OperationType;
-
-typedef struct {
-    char source[MAX_PATH];
-    OperationType type;
-} Clipboard;
 
 #endif

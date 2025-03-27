@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 
 void copy_to_clipboard(Clipboard *cb, const char *path, OperationType type) {
-    strncpy(cb->source, path, MAX_PATH-1);
+    strncpy(cb->source, path, MAX_PATH_LEN-1);
     cb->type = type;
 }
 
@@ -20,6 +20,6 @@ int paste_from_clipboard(Clipboard *cb, const char *dest) {
 }
 
 void clear_clipboard(Clipboard *cb) {
-    memset(cb->source, 0, MAX_PATH);
+    memset(cb->source, 0, MAX_PATH_LEN);
     cb->type = OP_COPY;
 }

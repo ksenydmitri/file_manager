@@ -1,5 +1,56 @@
-//
-// Created by kseny_dmitri on 25.03.25.
-//
-
 #include "error.h"
+#include "constants.h"
+#include "../ui/ui.h"
+#include <string.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdarg.h>
+
+static ErrorInfo last_error;
+
+void error_init() {
+    memset(&last_error, 0, sizeof(ErrorInfo));
+}
+
+void error_handle(ErrorCode code, const char* file, int line, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    last_error.code = code;
+    last_error.line = line;
+    strncpy(last_error.file, file, MAX_PATH_LEN-1);
+    
+    vsnprintf(last_error.message, sizeof(last_error.message), format, args);
+    
+    va_end(args);
+    
+    // Логирование в файл при необходимости
+}
+
+void error_show_last() {
+    char buffer[512];
+    snprintf(buffer, sizeof(buffer), 
+        "[%s:%d] %s: %s",
+        last_error.file, 
+        last_error.line,
+        error_code_to_string(last_error.code),
+        last_error.message);
+    
+    show_error_dialog(buffer);
+}
+
+const char* error_code_to_string(ErrorCode code) {
+    static const char* strings[] = {
+        [ERR_NONE] = "No error",
+        [ERR_FILE_NOT_FOUND] = "File not found",
+        [ERR_PERM_DENIED] = "Permission denied",
+        [ERR_IO_FAILURE] = "I/O failure",
+        [ERR_INVALID_ARG] = "Invalid argument",
+        [ERR_OUT_OF_MEM] = "Out of memory",
+        [ERR_DIR_NOT_EMPTY] = "Directory not empty",
+        [ERR_NOT_DIR] = "Not a directory",
+        [ERR_NOT_FILE] = "Not a regular file",
+        [ERR_ALREADY_EXISTS] = "Already exists"
+    };
+    return strings[code];
+}

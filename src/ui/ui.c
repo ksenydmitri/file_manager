@@ -1,7 +1,14 @@
 #include "ui.h"
-#include <form.h>
+#include "dialog.h"
+#include "../config/config.h"
+#include <ncurses.h>
+#include <string.h>
 
-void init_ui() {
+static WINDOW* left_win;
+static WINDOW* right_win;
+static WINDOW* status_win;
+
+void ui_init() {
     initscr();
     start_color();
     cbreak();
@@ -9,59 +16,95 @@ void init_ui() {
     keypad(stdscr, TRUE);
     curs_set(0);
 
-    init_pair(COLOR_DIR, COLOR_BLUE, COLOR_BLACK);
-    init_pair(COLOR_FILE, COLOR_WHITE, COLOR_BLACK);
-    init_pair(COLOR_LINK, COLOR_CYAN, COLOR_BLACK);
+    init_pair(1, COLOR_BLUE, COLOR_BLACK);
+    init_pair(2, COLOR_WHITE, COLOR_BLACK);
+    init_pair(3, COLOR_RED, COLOR_BLACK);
+
+    ui_handle_resize();
 }
 
-void draw_interface(Tab *tabs, int active_tab, const Clipboard *cb) {
-    clear();
-    Tab *t = &tabs[active_tab];
+void ui_cleanup() {
+    delwin(left_win);
+    delwin(right_win);
+    delwin(status_win);
+    endwin();
+}
 
-    // Рисуем вкладки
-    for (int i = 0; i < MAX_TABS; i++) {
-        if (i == active_tab) attron(A_REVERSE);
-        mvprintw(0, i*15, " Tab %d ", i+1);
-        attroff(A_REVERSE);
-    }
-
-    // Информационная строка
-    attron(A_BOLD);
-    mvprintw(1, 0, "Path: %s", t->path);
-    attroff(A_BOLD);
-
-    // Список файлов
+void ui_handle_resize() {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
 
-    for (int i = t->offset; i < t->file_count && i < t->offset + max_y - 5; i++) {
-        int y = i - t->offset + 3;
-        if (i == t->selected) attron(A_REVERSE);
+    if(left_win) delwin(left_win);
+    if(right_win) delwin(right_win);
+    if(status_win) delwin(status_win);
 
-        // Цвета для разных типов
-        if (t->files[i].is_dir) {
-            attron(COLOR_PAIR(COLOR_DIR));
-        } else {
-            attron(COLOR_PAIR(COLOR_FILE));
-        }
+    int panel_width = (max_x - 2) / 2;
 
-        mvprintw(y, 0, "%c %-30s %10ld",
-                t->files[i].is_dir ? 'D' : 'F',
-                t->files[i].name,
-                t->files[i].size);
-
-        if (i == t->selected) attroff(A_REVERSE);
-    }
-
-    // Статус бар
-    mvprintw(max_y-2, 0, "Clipboard: %s [%s]",
-            cb->source,
-            cb->type == OP_COPY ? "Copy" : "Move");
-
-    mvprintw(max_y-1, 0, "F1-New F2-Rename F3-Delete F5-Copy F6-Move F10-Quit");
+    left_win = newwin(max_y - 2, panel_width, 1, 1);
+    right_win = newwin(max_y - 2, panel_width, 1, panel_width + 1);
+    status_win = newwin(1, max_x, max_y - 1, 0);
 
     refresh();
 }
 
-// Остальные функции интерфейса...
-#include "ui.h"
+static void draw_panel(WINDOW* win, const Tab* tab, int is_active) {
+    werase(win);
+
+    // Заголовок
+    wattron(win, A_BOLD | COLOR_PAIR(1));
+    mvwprintw(win, 0, 2, "%s", tab->path);
+    wattroff(win, A_BOLD | COLOR_PAIR(1));
+
+    // Список файлов
+    int max_y, max_x;
+    getmaxyx(win, max_y, max_x);
+
+    for(int i = tab->offset;
+        i < tab->file_count && i < tab->offset + max_y - 2;
+        i++) {
+
+        int y_pos = i - tab->offset + 1;
+
+        if(i == tab->selected) {
+            wattron(win, A_REVERSE);
+        }
+
+        // Тип файла
+        if(tab->files[i].is_dir) {
+            wattron(win, COLOR_PAIR(1));
+            mvwaddch(win, y_pos, 2, 'D');
+        } else {
+            wattron(win, COLOR_PAIR(2));
+            mvwaddch(win, y_pos, 2, 'F');
+        }
+
+        // Имя и размер
+        mvwprintw(win, y_pos, 5, "%-30s %8ld",
+                tab->files[i].name,
+                tab->files[i].size);
+
+        if(i == tab->selected) {
+            wattroff(win, A_REVERSE);
+        }
+    }
+
+    box(win, 0, 0);
+    wrefresh(win);
+}
+
+void ui_draw_interface(const ApplicationState* state) {
+    const Tab* left_tab = &state->tabs[0];
+    const Tab* right_tab = &state->tabs[1];
+
+    draw_panel(left_win, left_tab, state->active_tab == 0);
+    draw_panel(right_win, right_tab, state->active_tab == 1);
+
+    // Статус бар
+    werase(status_win);
+    wattron(status_win, A_BOLD);
+    mvwprintw(status_win, 0, 0, " F1:Help  F3:Delete  F5:Copy  F6:Move  F10:Exit ");
+    wattroff(status_win, A_BOLD);
+    wrefresh(status_win);
+
+    refresh();
+}

@@ -1,50 +1,22 @@
-#include "ui.h"
-#include "ops.h"
-#include <unistd.h>
+#include "app.h"
+#include "../ui/ui.h"
+#include <ncurses.h>
 
 int main() {
-    Tab tabs[MAX_TABS] = {0};
-    Clipboard cb = {0};
-    int active_tab = 0;
-    int ch;
+    ApplicationState app;
 
-    // Инициализация
-    for (int i = 0; i < MAX_TABS; i++) {
-        getcwd(tabs[i].path, MAX_PATH);
-        load_directory(&tabs[i]);
-    }
+    // Инициализация ncurses
+    ui_init();
 
-    init_ui();
+    // Инициализация состояния приложения
+    app_init(&app);
 
     // Главный цикл
-    while ((ch = getch()) != KEY_F(10)) {
-        Tab *t = &tabs[active_tab];
+    app_run(&app);
 
-        switch(ch) {
-            case KEY_LEFT:
-                if (active_tab > 0) active_tab--;
-            break;
-            case KEY_RIGHT:
-                if (active_tab < MAX_TABS-1) active_tab++;
-            break;
-            case KEY_UP:
-                if (t->selected > 0) t->selected--;
-            break;
-            case KEY_DOWN:
-                if (t->selected < t->file_count-1) t->selected++;
-            break;
-            case '\n':
-                // Обработка входа в директорию
-                    break;
-            case KEY_F(1):
-                // Создание файла/директории
-                    break;
-            // Обработка других клавиш...
-        }
+    // Очистка
+    app_cleanup(&app);
+    ui_cleanup();
 
-        draw_interface(tabs, active_tab, &cb);
-    }
-
-    endwin();
     return 0;
 }
