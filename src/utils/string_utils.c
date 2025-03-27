@@ -6,9 +6,10 @@ void str_trim(char* str) {
     char *end = str + strlen(str) - 1;
     while (end >= str && isspace(*end)) end--;
     *(end + 1) = '\0';
-    
-    char *start = str;
+
+    const char *start = str;  // Changed to pointer-to-const
     while (*start && isspace(*start)) start++;
+
     memmove(str, start, end - start + 2);
 }
 

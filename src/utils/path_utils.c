@@ -15,7 +15,7 @@ void normalize_path(char *path) {
 }
 
 void get_parent_dir(char *path) {
-    char *parent = dirname(path);
+    const char *parent = dirname(path);
     strncpy(path, parent, MAX_PATH_LEN);
 }
 

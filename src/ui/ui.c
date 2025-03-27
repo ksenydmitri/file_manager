@@ -51,7 +51,9 @@ void ui_handle_resize() {
 
 static void draw_panel(WINDOW* win, const Tab* tab, int is_active) {
     werase(win);
-    int max_y, max_x;
+
+    int max_y;
+    int max_x;
     getmaxyx(win, max_y, max_x);
 
     // Draw panel border differently if active
@@ -70,12 +72,21 @@ static void draw_panel(WINDOW* win, const Tab* tab, int is_active) {
 
     // File list
     for(int i = tab->offset; i < tab->file_count && i < tab->offset + max_y - 2; i++) {
-        int y_pos = i - tab->offset + 1;
-        int attr = 0;
+        int y_pos;
+        int attr;
 
-        if(i == tab->selected) attr |= A_REVERSE;
-        if(tab->files[i].type == FILE_DIRECTORY) attr |= COLOR_PAIR(1);
-        else attr |= COLOR_PAIR(2);
+        y_pos = i - tab->offset + 1;
+        attr = 0;
+
+        if(i == tab->selected) {
+            attr |= A_REVERSE;
+        }
+
+        if(tab->files[i].type == FILE_DIRECTORY) {
+            attr |= COLOR_PAIR(1);
+        } else {
+            attr |= COLOR_PAIR(2);
+        }
 
         wattron(win, attr);
         mvwprintw(win, y_pos, 2, "%c %-30s %8ld",
