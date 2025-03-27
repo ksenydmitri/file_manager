@@ -1,31 +1,34 @@
 #include "dialog.h"
 #include <ncurses.h>
 #include <string.h>
+#include <stbool.h>
+#include <ctype.h>
 
-DialogResult show_dialog(DialogType type, const char* title, const char* message) {
+DialogResult show_dialog(DialogType type, const char* title, const char* message)
+{
     DialogResult result = {0};
+
+    // Calculate dialog position and size
+    const int width = 50;
+    const int height = 7;
 
     int max_y;
     int max_x;
     getmaxyx(stdscr, max_y, max_x);
 
-    // Dialog dimensions
-    int width;
-    int height;
-    int start_x;
-    int start_y;
+    const int start_x = (max_x - width) / 2;
+    const int start_y = (max_y - height) / 2;
 
-    width = 50;
-    height = 7;
-    start_x = (max_x - width) / 2;
-    start_y = (max_y - height) / 2;
+    // Create dialog window
+    WINDOW* dialog_win = newwin(height, width, start_y, start_x);
+    if (!dialog_win) {
+        return result;
+    }
 
-    WINDOW* dialog_win;
-    dialog_win = newwin(height, width, start_y, start_x);
     keypad(dialog_win, TRUE);
-
-    // Draw border
     box(dialog_win, 0, 0);
+
+    // Draw title
     wattron(dialog_win, A_BOLD);
     mvwprintw(dialog_win, 0, 2, " %s ", title);
     wattroff(dialog_win, A_BOLD);
@@ -33,49 +36,69 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
     // Show message
     mvwprintw(dialog_win, 2, 2, "%s", message);
 
-    switch(type) {
-        case DIALOG_CONFIRM: {
-            mvwprintw(dialog_win, height-2, 10, "Yes (Y) / No (N)");
-            wrefresh(dialog_win);
-
-            int ch;
-            while((ch = wgetch(dialog_win))) {
-                if(ch == 'y' || ch == 'Y') {
-                    result.confirmed = 1;
-                    break;
-                }
-                if(ch == 'n' || ch == 'N') {
-                    result.confirmed = 0;
-                    break;
-                }
-            }
+    // Handle different dialog types
+    switch (type) {
+        case DIALOG_CONFIRM:
+            handle_confirm_dialog(dialog_win, height, &result);
             break;
-        }
-        case DIALOG_INPUT: {
-            echo();
-            curs_set(1);
-            mvwprintw(dialog_win, height-3, 2, "Input: ");
-            wmove(dialog_win, height-3, 9);
 
-            int input_size;
-            input_size = 255;
-            wgetnstr(dialog_win, result.input, input_size);
+        case DIALOG_INPUT:
+            handle_input_dialog(dialog_win, height, &result);
+            break;
 
-            curs_set(0);
-            noecho();
-            result.confirmed = 1;
+        case DIALOG_ERROR:
+            handle_error_dialog(dialog_win, height);
             break;
-        }
-        case DIALOG_ERROR: {
-            mvwprintw(dialog_win, height-2, 2, "Press any key...");
-            wrefresh(dialog_win);
-            wgetch(dialog_win);
-            break;
-        }
     }
-    
+
     delwin(dialog_win);
     return result;
+}
+
+static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result)
+{
+    mvwprintw(win, height-2, 10, "Yes (Y) / No (N)");
+    wrefresh(win);
+
+    int done = 0;  // Using int instead of bool for wider compatibility
+    while (!done) {
+        const int ch = wgetch(win);
+
+        switch (tolower(ch)) {
+            case 'y':
+                result->confirmed = 1;
+                done = 1;
+                break;
+
+            case 'n':
+                result->confirmed = 0;
+                done = 1;
+                break;
+        }
+    }
+}
+
+static void handle_input_dialog(WINDOW* win, int height, DialogResult* result)
+{
+    echo();
+    curs_set(1);
+
+    mvwprintw(win, height-3, 2, "Input: ");
+    wmove(win, height-3, 9);
+
+    const int input_size = 255;
+    wgetnstr(win, result->input, input_size);
+
+    curs_set(0);
+    noecho();
+    result->confirmed = 1;
+}
+
+static void handle_error_dialog(WINDOW* win, int height)
+{
+    mvwprintw(win, height-2, 2, "Press any key...");
+    wrefresh(win);
+    wgetch(win);
 }
 
 void show_error_dialog(const char* message) {
