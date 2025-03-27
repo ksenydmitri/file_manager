@@ -4,6 +4,56 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+static void handle_input_dialog(WINDOW* win, int height, DialogResult* result)
+{
+    echo();
+    curs_set(1);
+
+    mvwprintw(win, height-3, 2, "Input: ");
+    wmove(win, height-3, 9);
+
+    const int input_size = 255;
+    wgetnstr(win, result->input, input_size);
+
+    curs_set(0);
+    noecho();
+    result->confirmed = 1;
+}
+
+static void handle_error_dialog(WINDOW* win, int height)
+{
+    mvwprintw(win, height-2, 2, "Press any key...");
+    wrefresh(win);
+    wgetch(win);
+}
+
+static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result)
+{
+    mvwprintw(win, height-2, 10, "Yes (Y) / No (N)");
+    wrefresh(win);
+
+    int done = 0;
+    while (!done) {
+        const int ch = wgetch(win);
+
+        switch (tolower(ch)) {
+            case 'y':
+                result->confirmed = 1;
+                done = 1;
+                break;
+
+            case 'n':
+                result->confirmed = 0;
+                done = 1;
+                break;
+
+            default:
+                // Ignore other keys - continue waiting for Y/N
+                break;
+        }
+    }
+}
+
 DialogResult show_dialog(DialogType type, const char* title, const char* message)
 {
     DialogResult result = {0};
@@ -53,56 +103,6 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
 
     delwin(dialog_win);
     return result;
-}
-
-static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result)
-{
-    mvwprintw(win, height-2, 10, "Yes (Y) / No (N)");
-    wrefresh(win);
-
-    int done = 0;
-    while (!done) {
-        const int ch = wgetch(win);
-
-        switch (tolower(ch)) {
-            case 'y':
-                result->confirmed = 1;
-                done = 1;
-                break;
-
-            case 'n':
-                result->confirmed = 0;
-                done = 1;
-                break;
-
-            default:
-                // Ignore other keys - continue waiting for Y/N
-                break;
-        }
-    }
-}
-
-static void handle_input_dialog(WINDOW* win, int height, DialogResult* result)
-{
-    echo();
-    curs_set(1);
-
-    mvwprintw(win, height-3, 2, "Input: ");
-    wmove(win, height-3, 9);
-
-    const int input_size = 255;
-    wgetnstr(win, result->input, input_size);
-
-    curs_set(0);
-    noecho();
-    result->confirmed = 1;
-}
-
-static void handle_error_dialog(WINDOW* win, int height)
-{
-    mvwprintw(win, height-2, 2, "Press any key...");
-    wrefresh(win);
-    wgetch(win);
 }
 
 void show_error_dialog(const char* message) {

@@ -19,8 +19,8 @@ typedef struct {
 
 // Показать диалоговое окно
 DialogResult show_dialog(DialogType type, const char* title, const char* message);
-static void handle_error_dialog(WINDOW* win, int height);
-static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result);
-static void handle_input_dialog(WINDOW* win, int height, DialogResult* result);
+//static void handle_error_dialog(WINDOW* win, int height);
+//static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result);
+//static void handle_input_dialog(WINDOW* win, int height, DialogResult* result);
 
 #endif
