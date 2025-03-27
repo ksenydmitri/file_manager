@@ -1,4 +1,4 @@
-# File Manager [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# File Manager
 
 Консольный файловый менеджер с расширенными возможностями на базе ncurses
 
