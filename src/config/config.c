@@ -31,7 +31,9 @@ void config_load(AppConfig* config) {
     
     char line[256];
     while (fgets(line, sizeof(line), fp)) {
-        char key[64], value[64];
+        char key[64];
+        char value[64];
+
         if (sscanf(line, "%63[^=]=%63[^\n]", key, value) == 2) {
             if (strcmp(key, "theme.dir_color") == 0) {
                 config->theme.dir_color = atoi(value);

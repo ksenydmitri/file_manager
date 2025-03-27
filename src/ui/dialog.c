@@ -4,32 +4,40 @@
 
 DialogResult show_dialog(DialogType type, const char* title, const char* message) {
     DialogResult result = {0};
-    int max_y, max_x;
+
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
-    
-    // Размеры диалога
-    int width = 50;
-    int height = 7;
-    int start_x = (max_x - width) / 2;
-    int start_y = (max_y - height) / 2;
-    
-    WINDOW* dialog_win = newwin(height, width, start_y, start_x);
+
+    // Dialog dimensions
+    int width;
+    int height;
+    int start_x;
+    int start_y;
+
+    width = 50;
+    height = 7;
+    start_x = (max_x - width) / 2;
+    start_y = (max_y - height) / 2;
+
+    WINDOW* dialog_win;
+    dialog_win = newwin(height, width, start_y, start_x);
     keypad(dialog_win, TRUE);
-    
-    // Рамка
+
+    // Draw border
     box(dialog_win, 0, 0);
     wattron(dialog_win, A_BOLD);
     mvwprintw(dialog_win, 0, 2, " %s ", title);
     wattroff(dialog_win, A_BOLD);
-    
-    // Сообщение
+
+    // Show message
     mvwprintw(dialog_win, 2, 2, "%s", message);
-    
+
     switch(type) {
         case DIALOG_CONFIRM: {
             mvwprintw(dialog_win, height-2, 10, "Yes (Y) / No (N)");
             wrefresh(dialog_win);
-            
+
             int ch;
             while((ch = wgetch(dialog_win))) {
                 if(ch == 'y' || ch == 'Y') {
@@ -48,7 +56,11 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
             curs_set(1);
             mvwprintw(dialog_win, height-3, 2, "Input: ");
             wmove(dialog_win, height-3, 9);
-            wgetnstr(dialog_win, result.input, 255);
+
+            int input_size;
+            input_size = 255;
+            wgetnstr(dialog_win, result.input, input_size);
+
             curs_set(0);
             noecho();
             result.confirmed = 1;
