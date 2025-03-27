@@ -21,8 +21,9 @@ int dir_create(const char* path) {
 
 int file_delete(const char* path) {
     if (unlink(path) == -1) {
-        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__,
-                   "Failed to delete: %s", path);
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Cannot open directory %s", tab->path);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
         return -1;
     }
     return 0;

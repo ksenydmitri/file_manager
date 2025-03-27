@@ -16,7 +16,7 @@ typedef struct {
 void error_init();
 
 // Обработка ошибки
-void error_handle(ErrorCode code, const char* file, int line, const char* format, ...);
+void error_handle(ErrorCode code, const char* file, int line, const char* message);
 
 // Отображение последней ошибки
 void error_show_last();

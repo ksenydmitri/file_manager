@@ -12,19 +12,17 @@ void error_init() {
     memset(&last_error, 0, sizeof(ErrorInfo));
 }
 
-void error_handle(ErrorCode code, const char* file, int line, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    
+void error_handle(ErrorCode code, const char* file, int line, const char* message) {
     last_error.code = code;
     last_error.line = line;
+
+    // Safely copy the file path
     strncpy(last_error.file, file, MAX_PATH_LEN-1);
-    
-    vsnprintf(last_error.message, sizeof(last_error.message), format, args);
-    
-    va_end(args);
-    
-    // Логирование в файл при необходимости
+    last_error.file[MAX_PATH_LEN-1] = '\0';
+
+    // Copy the pre-formatted message
+    strncpy(last_error.message, message, sizeof(last_error.message)-1);
+    last_error.message[sizeof(last_error.message)-1] = '\0';
 }
 
 void error_show_last() {
