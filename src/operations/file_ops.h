@@ -17,5 +17,6 @@ int delete_path(const char* path);
 int file_copy(const char* src, const char* dest);
 int file_move(const char* src, const char* dest);
 int get_file_info(const char* path, FileEntry* entry);
+void perform_file_search(const char* initial_directory, const char* target_name, FileSearchResult* results);
 
 #endif // FILE_OPS_H

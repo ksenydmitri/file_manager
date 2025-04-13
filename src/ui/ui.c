@@ -120,7 +120,6 @@ void ui_draw_interface(const ApplicationState* state) {
     refresh();
 }
 
-// Загрузка содержимого директории во вкладку
 void load_directory(Tab* tab) {
     DIR* dir = opendir(tab->path);
     if (!dir) {

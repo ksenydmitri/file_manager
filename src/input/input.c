@@ -1,12 +1,23 @@
 #include "../operations/file_ops.h"
 #include "../operations/clipboard.h"
 #include "../ui/ui.h"
+#include "../ui/dialog.h"
 #include <ncurses.h>
 #include <signal.h>
 #include <string.h>
 #include "../../include/constants.h"
 #include "../errors/error.h"
 #include "input.h"
+#include "../operations/file_ops.h"
+
+void navigate_up(ApplicationState* state);
+void navigate_down(ApplicationState* state);
+void go_back(ApplicationState* state);
+void delete_selected(ApplicationState* state);
+void handle_copy_operation(ApplicationState* state);
+void handle_paste_operation(ApplicationState* state);
+void handle_create_operation(ApplicationState* state);
+void enter_file_or_directory(ApplicationState* state);
 
 void handle_input(ApplicationState* state, int key) {
 
@@ -28,7 +39,7 @@ void handle_input(ApplicationState* state, int key) {
         break;
 
         case 10:
-            enter_directory(state);
+            enter_file_or_directory(state);
         break;
 
         case KEY_BACKSPACE:
@@ -36,7 +47,7 @@ void handle_input(ApplicationState* state, int key) {
         break;
 
         case KEY_F(1):
-            delete_selected(state);
+            show_create_object_dialog(state);
         break;
 
         case KEY_F(3):
@@ -54,6 +65,9 @@ void handle_input(ApplicationState* state, int key) {
         case KEY_F(10):
         	state->should_exit = 1;
         break;
+        case 'p':
+            show_search_dialog(state);
+            break;
 
         default:
        	break;
@@ -83,17 +97,33 @@ void navigate_down(ApplicationState* state) {
     }
 }
 
-void enter_directory(ApplicationState* state) {
-    Tab* tab = &state->tabs[state->active_tab];
-    FileEntry* entry = &tab->files[tab->selected];
+void enter_directory(ApplicationState* state, Tab* tab, FileEntry* entry) {
+  	char new_path[MAX_PATH_LEN];
+    snprintf(new_path, MAX_PATH_LEN, "%s/%s", tab->path, entry->name);
+    strncpy(tab->path, new_path, MAX_PATH_LEN);
+    load_directory(tab);
+    tab->selected = 0;
+    tab->offset = 0;
+}
 
-    if(entry->type == FILE_DIRECTORY) {
-        char new_path[MAX_PATH_LEN];
-        snprintf(new_path, MAX_PATH_LEN, "%s/%s", tab->path, entry->name);
-        strncpy(tab->path, new_path, MAX_PATH_LEN);
-        load_directory(tab);
-        tab->selected = 0;
-        tab->offset = 0;
+void enter_file(ApplicationState* state, Tab* tab, FileEntry* entry) {
+ 	show_file_dialog(state, tab->path, entry);
+}
+
+void enter_file_or_directory(ApplicationState* state) {
+  	Tab* tab = &state->tabs[state->active_tab];
+    FileEntry* entry = &tab->files[tab->selected];
+    switch(entry->type) {
+      case FILE_DIRECTORY:
+        enter_directory(state, tab, entry);
+        break;
+      case FILE_REGULAR:
+        enter_file(state, tab, entry);
+        break;
+      case FILE_SYMLINK:
+        break;
+      case FILE_OTHER:
+        break;
     }
 }
 
@@ -143,5 +173,5 @@ void delete_selected(ApplicationState* state) {
         return;
     }
 
-    load_directory(tab); // Обновление списка файлов
+    load_directory(tab);
 }

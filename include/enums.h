@@ -47,7 +47,8 @@ typedef enum {
 typedef enum {
     DIALOG_CONFIRM,
     DIALOG_INPUT,
-    DIALOG_ERROR
+    DIALOG_ERROR,
+    DIALOG_FILE
 } DialogType;
 
 #endif

@@ -23,4 +23,6 @@
 #define KEY_ESCAPE 27
 #define KEY_ENTER 10
 
+#define MAX_SEARCH_RESULTS 100
+
 #endif

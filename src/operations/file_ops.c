@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include <string.h>
 #include "../errors/error.h"
+#include "../utils/string_utils.h"3
+#include "../utils/path_utils.h"
 
 // ======== Создание файлов и директорий ======== //
 int file_create(const char* path) {
@@ -146,4 +148,51 @@ int get_file_info(const char* path, FileEntry* entry) {
     entry->gid = st.st_gid;
 
     return 0;
+}
+
+void search_files(const char* directory, const char* target_name, FileSearchResult* results) {
+    char normalized_dir[MAX_PATH_LEN];
+    str_copy(normalized_dir, directory, MAX_PATH_LEN);
+    normalize_path(normalized_dir);
+
+    DIR* dir = opendir(normalized_dir);
+    if (!dir) return;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        char full_path[MAX_PATH_LEN];
+        snprintf(full_path, MAX_PATH_LEN, "%s/%s", normalized_dir, entry->d_name);
+
+        if (!is_valid_path(full_path)) {
+            continue;
+        }
+
+        struct stat st;
+        if (stat(full_path, &st) != 0) {
+            continue;
+        }
+
+        if (S_ISDIR(st.st_mode)) {
+            search_files(full_path, target_name, results);
+        } else if (S_ISREG(st.st_mode)) {
+            if (strcmp(entry->d_name, target_name) == 0) {
+                if (results->count < MAX_SEARCH_RESULTS) {
+                    str_copy(results->files[results->count].name, entry->d_name, MAX_FILENAME_LEN);
+                    str_copy(results->files[results->count].path, full_path, MAX_PATH_LEN);
+                    results->count++;
+                }
+            }
+        }
+    }
+
+    closedir(dir);
+}
+
+void perform_file_search(const char* initial_directory, const char* target_name, FileSearchResult* results) {
+    results->count = 0;
+    search_files(initial_directory, target_name, results);
 }
