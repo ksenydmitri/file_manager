@@ -8,6 +8,7 @@
 #include <string.h>
 #include "../errors/error.h"
 
+// ======== Создание файлов и директорий ======== //
 int file_create(const char* path) {
     FILE* fp = fopen(path, "w");
     if (!fp) return -1;
@@ -17,6 +18,27 @@ int file_create(const char* path) {
 
 int dir_create(const char* path) {
     return mkdir(path, 0755);
+}
+
+// ======== Удаление файла или директории ======== //
+int delete_path(const char* path) {
+    struct stat st;
+
+    // Получение информации о файле/директории
+    if (lstat(path, &st) != 0) {
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Failed to get file info: %s", path);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        return -1;
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+        // Удаляем директорию рекурсивно
+        return dir_delete_recursive(path);
+    } else {
+        // Удаляем файл
+        return file_delete(path);
+    }
 }
 
 int file_delete(const char* path) {
@@ -29,11 +51,50 @@ int file_delete(const char* path) {
     return 0;
 }
 
+int dir_delete_recursive(const char* path) {
+    DIR* dir = opendir(path);
+    if (!dir) {
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Cannot open directory: %s", path);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        return -1;
+    }
+
+    struct dirent* entry;
+    int ret = 0;
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue; // Пропуск "." и ".."
+        }
+
+        char full_path[MAX_PATH_LEN];
+        snprintf(full_path, MAX_PATH_LEN, "%s/%s", path, entry->d_name);
+
+        if (delete_path(full_path) != 0) {
+            ret = -1; // Запоминаем ошибку, но продолжаем обработку остальных файлов
+        }
+    }
+
+    closedir(dir);
+
+    // Удаляем директорию
+    if (ret == 0 && rmdir(path) != 0) {
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Failed to delete directory: %s", path);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        return -1;
+    }
+
+    return ret;
+}
+
+// ======== Копирование и перемещение файлов ======== //
 int file_copy(const char* src, const char* dest) {
-    FILE *source = fopen(src, "rb");
+    FILE* source = fopen(src, "rb");
     if (!source) return -1;
 
-    FILE *destination = fopen(dest, "wb");
+    FILE* destination = fopen(dest, "wb");
     if (!destination) {
         fclose(source);
         return -1;
@@ -41,7 +102,7 @@ int file_copy(const char* src, const char* dest) {
 
     char buffer[4096];
     size_t bytes;
-    while ((bytes = fread(buffer, 1, sizeof(buffer), source))) {
+    while ((bytes = fread(buffer, 1, sizeof(buffer), source)) > 0) {
         fwrite(buffer, 1, bytes, destination);
     }
 
@@ -54,13 +115,14 @@ int file_move(const char* src, const char* dest) {
     return rename(src, dest);
 }
 
+// ======== Получение информации о файле ======== //
 int get_file_info(const char* path, FileEntry* entry) {
     struct stat st;
     if (lstat(path, &st) != 0) {
-        return -1;  // Ошибка при получении информации о файле
+        return -1;
     }
 
-    // Определение типа файла
+    // Определяем тип файла
     if (S_ISREG(st.st_mode)) {
         entry->type = FILE_REGULAR;
     } else if (S_ISDIR(st.st_mode)) {
@@ -71,11 +133,11 @@ int get_file_info(const char* path, FileEntry* entry) {
         entry->type = FILE_OTHER;
     }
 
-    // Заполнение структуры FileEntry
+    // Инициализация имени файла
     const char* filename = strrchr(path, '/');
     filename = (filename != NULL) ? filename + 1 : path;
     strncpy(entry->name, filename, MAX_FILENAME_LEN - 1);
-    entry->name[MAX_FILENAME_LEN - 1] = '\0';  // Гарантируем завершающий нуль
+    entry->name[MAX_FILENAME_LEN - 1] = '\0';
 
     entry->size = st.st_size;
     entry->mode = st.st_mode;
@@ -83,108 +145,5 @@ int get_file_info(const char* path, FileEntry* entry) {
     entry->uid = st.st_uid;
     entry->gid = st.st_gid;
 
-    return 0;  // Успешное выполнение
-}
-
-// Вспомогательная функция для объединения путей
-static void path_join(char* dest, const char* dir, const char* file) {
-    snprintf(dest, MAX_PATH_LEN, "%s/%s", dir, file);
-}
-
-int dir_delete_recursive(const char* path) {
-    DIR *dir = opendir(path);
-    if (!dir) {
-        perror("opendir failed");
-        return -1;
-    }
-
-    struct dirent *entry;
-    int ret = 0;
-
-    while ((entry = readdir(dir)) != NULL && ret == 0) {
-        // Пропускаем "." и ".."
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-            continue;
-        }
-
-        char full_path[MAX_PATH_LEN];
-        path_join(full_path, path, entry->d_name);
-
-        // Обработка для символических ссылок (чтобы не следовать по ним)
-        struct stat st;
-        if (lstat(full_path, &st) == -1) {
-            perror("lstat failed");
-            ret = -1;
-            continue;
-        }
-
-        if (S_ISDIR(st.st_mode)) {
-            // Рекурсивное удаление поддиректории
-            if (dir_delete_recursive(full_path) != 0) {
-                ret = -1;
-            }
-        } else {
-            // Удаление файла
-            if (unlink(full_path) != 0) {
-                perror("unlink failed");
-                ret = -1;
-            }
-        }
-    }
-
-    closedir(dir);
-
-    // Удаляем саму директорию, если не было ошибок
-    if (ret == 0 && rmdir(path) != 0) {
-        perror("rmdir failed");
-        ret = -1;
-    }
-
-    return ret;
-}
-
-void load_directory(Tab* tab) {
-    DIR* dir = opendir(tab->path);
-    if (!dir) {
-        char error_msg[MAX_PATH_LEN + 50];
-        snprintf(error_msg, sizeof(error_msg), "Cannot open directory %s", tab->path);
-        error_handle(ERR_FILE_NOT_FOUND, __FILE__, __LINE__, error_msg);
-        return;
-    }
-
-    struct dirent* entry;
-    tab->file_count = 0;
-
-    while ((entry = readdir(dir)) && tab->file_count < MAX_FILES_PER_DIR) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-            continue;
-        }
-
-        FileEntry* file = &tab->files[tab->file_count++];
-        get_file_info(entry->d_name, file);
-    }
-    closedir(dir);
-}
-
-void delete_selected(ApplicationState* state) {
-    Tab* tab = &state->tabs[state->active_tab];
-    if (tab->selected >= tab->file_count) return;
-
-    FileEntry* entry = &tab->files[tab->selected];
-    char path[MAX_PATH_LEN];
-    snprintf(path, sizeof(path), "%s/%s", tab->path, entry->name);
-
-    if (entry->type == FILE_DIRECTORY) {
-        if (rmdir(path) != 0) {
-            error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, "Failed to delete directory");
-            return;
-        }
-    } else {
-        if (unlink(path) != 0) {
-            error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, "Failed to delete file");
-            return;
-        }
-    }
-
-    load_directory(tab); // Обновляем список файлов
+    return 0;
 }

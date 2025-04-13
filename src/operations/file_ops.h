@@ -1,31 +1,21 @@
 #ifndef FILE_OPS_H
 #define FILE_OPS_H
 
+#include <sys/types.h>
+#include "../../include/enums.h"
 #include "../../include/types.h"
-#include "../utils/path_utils.h"
 
-// Создание файла
+#define MAX_PATH_LEN 4096
+#define MAX_FILENAME_LEN 256
+
+// Функции для работы с файлами и директориями
 int file_create(const char* path);
-
-// Создание директории
 int dir_create(const char* path);
-
-// Удаление файла/директории
 int file_delete(const char* path);
-
-// Копирование файла/директории
+int dir_delete_recursive(const char* path);
+int delete_path(const char* path);
 int file_copy(const char* src, const char* dest);
-
-// Перемещение файла/директории
 int file_move(const char* src, const char* dest);
-
-// Получение информации о файле
 int get_file_info(const char* path, FileEntry* entry);
 
-// Рекурсивное удаление директории
-int dir_delete_recursive(const char* path);
-
-
-void load_directory(Tab* tab);
-
-#endif
+#endif // FILE_OPS_H

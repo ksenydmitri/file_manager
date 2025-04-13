@@ -35,6 +35,7 @@ void app_run(ApplicationState* state) {
         int ch = getch();
         handle_input(state, ch);
     }
+    state->need_refresh = 1;
 }
 
 void app_cleanup(ApplicationState* state) {

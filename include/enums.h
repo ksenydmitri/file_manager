@@ -43,4 +43,11 @@ typedef enum {
     TOTAL_ACTIONS
 } KeyAction;
 
+// Типы диалогов
+typedef enum {
+    DIALOG_CONFIRM,
+    DIALOG_INPUT,
+    DIALOG_ERROR
+} DialogType;
+
 #endif

@@ -14,4 +14,6 @@ void ui_draw_interface(const ApplicationState* state);
 // Обновление размеров
 void ui_handle_resize();
 
+void load_directory(Tab* tab);
+
 #endif

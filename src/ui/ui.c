@@ -3,6 +3,11 @@
 #include "../config/config.h"
 #include "../ui/ui.h"
 #include "../../include/types.h"
+#include "../operations/file_ops.h"
+#include "../errors/error.h"
+#include <dirent.h>
+#include <string.h>
+#include <stdio.h>
 #include <ncurses.h>
 #include <string.h>
 
@@ -70,7 +75,6 @@ static void draw_panel(WINDOW* win, const Tab* tab, int is_active) {
     mvwprintw(win, 0, 2, "%s", tab->path);
     wattroff(win, A_BOLD | COLOR_PAIR(1));
 
-    // File list
     for(int i = tab->offset; i < tab->file_count && i < tab->offset + max_y - 2; i++) {
         int y_pos;
         int attr;
@@ -114,4 +118,36 @@ void ui_draw_interface(const ApplicationState* state) {
     wrefresh(status_win);
 
     refresh();
+}
+
+// Загрузка содержимого директории во вкладку
+void load_directory(Tab* tab) {
+    DIR* dir = opendir(tab->path);
+    if (!dir) {
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Cannot open directory %s", tab->path);
+        error_handle(ERR_FILE_NOT_FOUND, __FILE__, __LINE__, error_msg);
+        return;
+    }
+
+    struct dirent* entry;
+    tab->file_count = 0;
+
+    while ((entry = readdir(dir)) && tab->file_count < MAX_FILES_PER_DIR) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue; // Пропускаем текущий и родительский каталоги
+        }
+
+        // Заполняем структуру FileEntry
+        FileEntry* file = &tab->files[tab->file_count++];
+        char full_path[MAX_PATH_LEN];
+        snprintf(full_path, MAX_PATH_LEN, "%s/%s", tab->path, entry->d_name);
+
+        // Используем file_ops для извлечения данных о файле
+        if (get_file_info(full_path, file) != 0) {
+            tab->file_count--; // Если ошибка, не засчитываем файл
+        }
+    }
+
+    closedir(dir);
 }

@@ -5,13 +5,12 @@
 #include <signal.h>
 #include <string.h>
 #include "../../include/constants.h"
+#include "../errors/error.h"
 #include "input.h"
 
 void handle_input(ApplicationState* state, int key) {
-    // Убрали неиспользуемую переменную current_tab
 
     switch(key) {
-        // Навигация
         case KEY_UP:
             navigate_up(state);
         break;
@@ -28,13 +27,16 @@ void handle_input(ApplicationState* state, int key) {
             state->active_tab = (state->active_tab < MAX_TABS-1) ? state->active_tab + 1 : MAX_TABS-1;
         break;
 
-        // Действия с файлами
-        case 10: // Enter
+        case 10:
             enter_directory(state);
         break;
 
         case KEY_BACKSPACE:
             go_back(state);
+        break;
+
+        case KEY_F(1):
+            delete_selected(state);
         break;
 
         case KEY_F(3):
@@ -50,16 +52,15 @@ void handle_input(ApplicationState* state, int key) {
         break;
 
         case KEY_F(10):
-            state->should_exit = 1;
+        	state->should_exit = 1;
         break;
 
         default:
-            // Можно добавить обработку неизвестных клавиш
-                break;
+       	break;
     }
+    state->need_refresh = 1;
 }
 
-// Навигация вверх
 void navigate_up(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     if(tab->selected > 0) {
@@ -68,9 +69,9 @@ void navigate_up(ApplicationState* state) {
             tab->offset = tab->selected;
         }
     }
+
 }
 
-// Навигация вниз
 void navigate_down(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     if(tab->selected < tab->file_count - 1) {
@@ -82,11 +83,10 @@ void navigate_down(ApplicationState* state) {
     }
 }
 
-// Вход в директорию
 void enter_directory(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     FileEntry* entry = &tab->files[tab->selected];
-    
+
     if(entry->type == FILE_DIRECTORY) {
         char new_path[MAX_PATH_LEN];
         snprintf(new_path, MAX_PATH_LEN, "%s/%s", tab->path, entry->name);
@@ -97,11 +97,10 @@ void enter_directory(ApplicationState* state) {
     }
 }
 
-// Возврат на уровень выше
 void go_back(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     char* last_slash = strrchr(tab->path, '/');
-    
+
     if(last_slash != NULL) {
         *last_slash = '\0';
         if(strlen(tab->path) == 0) strcpy(tab->path, "/");
@@ -111,7 +110,6 @@ void go_back(ApplicationState* state) {
     }
 }
 
-// Реализация новых функций в input.c
 void handle_copy_operation(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     if (tab->selected < tab->file_count) {
@@ -126,6 +124,24 @@ void handle_paste_operation(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     if (strlen(state->clipboard.source) > 0) {
         paste_from_clipboard(&state->clipboard, tab->path);
-        load_directory(tab); // Обновить содержимое директории
+        load_directory(tab);
     }
+}
+
+void delete_selected(ApplicationState* state) {
+    Tab* tab = &state->tabs[state->active_tab];
+    if (tab->selected >= tab->file_count) return;
+
+    FileEntry* entry = &tab->files[tab->selected];
+    char path[MAX_PATH_LEN];
+    snprintf(path, MAX_PATH_LEN, "%s/%s", tab->path, entry->name);
+
+    if (delete_path(path) != 0) {
+        char error_msg[MAX_PATH_LEN + 50];
+        snprintf(error_msg, sizeof(error_msg), "Failed to delete: %s", path);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        return;
+    }
+
+    load_directory(tab); // Обновление списка файлов
 }

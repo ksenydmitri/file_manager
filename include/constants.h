@@ -23,6 +23,4 @@
 #define KEY_ESCAPE 27
 #define KEY_ENTER 10
 
-
-
 #endif

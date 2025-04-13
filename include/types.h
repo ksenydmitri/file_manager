@@ -7,10 +7,6 @@
 #include "../src/config/config.h"
 #include "constants.h"
 
-#define MAX_FILENAME_LEN 256
-#define MAX_PATH_LEN 4096
-#define MAX_FILES_PER_DIR 4096
-
 typedef struct {
     char name[MAX_FILENAME_LEN];
     off_t size;
@@ -44,5 +40,11 @@ typedef struct {
     int should_exit;
     int need_refresh;
 } ApplicationState;
+
+// Результат диалога
+typedef struct {
+    int confirmed;
+    char input[256];
+} DialogResult;
 
 #endif

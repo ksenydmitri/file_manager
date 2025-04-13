@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "../../include/types.h"
 
 static void handle_input_dialog(WINDOW* win, int height, DialogResult* result)
 {
