@@ -1,0 +1,4 @@
+Duplicate file found (same inode 13631504):
+  /home/kseny_dmitri/tar_working_dir/file_manager/link1
+  /home/kseny_dmitri/tar_working_dir/file_manager/qwerty
+Potentially unused file (last accessed 32 days ago): /home/kseny_dmitri/tar_working_dir/file_manager/include/include/types.h
