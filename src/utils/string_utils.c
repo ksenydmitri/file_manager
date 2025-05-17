@@ -58,7 +58,7 @@ char* format_time(time_t raw_time) {
     char* buffer = malloc(30);
     if (!buffer) return NULL;
 
-    struct tm *time_info = localtime(&raw_time);
+    struct tm *time_info = localtime_r(&raw_time);
     strftime(buffer, 30, "%d %b %Y %H:%M", time_info);
 
     return buffer;

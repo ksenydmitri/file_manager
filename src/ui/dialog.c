@@ -402,8 +402,8 @@ int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
         return 1;
     }
 
-    struct passwd *pwd = getpwnam(result_user.input);
-    struct group *grp = getgrnam(result_group.input);
+    struct passwd *pwd = getpwnam_r(result_user.input);
+    struct group *grp = getpwnam_r(result_group.input);
 
     if (!pwd || !grp) {
         show_error_dialog("Invalid username or group name.");
@@ -420,7 +420,7 @@ int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
         free((void*)full_path);
         return 0;
     }
-}//НЕ ЗАБЫТЬ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+}
 
 void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry) {
     int max_y, max_x;
