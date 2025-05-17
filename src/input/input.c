@@ -128,12 +128,12 @@ void navigate_down(ApplicationState* state) {
 }
 
 void enter_directory(ApplicationState* state, Tab* tab, const FileEntry* entry) {
-  	const char *new_path = get_full_path(state,entry->name);
+  	char *new_path = get_full_path(state,entry->name);
     strncpy(tab->path, new_path, MAX_PATH_LEN);
     load_directory(tab);
     tab->selected = 0;
     tab->offset = 0;
-    free((void*)new_path);
+    free(new_path);
 }
 
 void enter_file(ApplicationState* state, Tab* tab, FileEntry* entry) {
@@ -194,6 +194,7 @@ void handle_change_owner(ApplicationState* state) {
     FileEntry* entry = &tab->files[tab->selected];
     if (!show_change_owner_dialog(state, entry)) {
         show_error_dialog("Can't change owner");
+        return;
     }
 }
 
@@ -226,6 +227,7 @@ void handle_change_permissions(ApplicationState* state) {
         show_change_permissions_dialog(state, entry);
     } else {
         show_error_dialog("Selected object not file!");
+        return;
     }
 }
 
@@ -236,6 +238,7 @@ void handle_file_entry(ApplicationState* state) {
         show_file_entry_dialog(state, entry);
     } else {
         show_error_dialog("Selected object not file!");
+        return;
     }
 }
 

@@ -379,14 +379,14 @@ struct mntent* get_file_system_mntent() {
 }
 
 DiskStats get_disk_stats(const char* device) {
+    DiskStats stats = {0};
     FILE* diskstats = fopen("/proc/diskstats", "r");
 
     if (diskstats == NULL) {
     show_error_dialog("Can't open /proc/diskstats");
-    return ;
+    return stats;
     }
 
-    DiskStats stats = {0};
     char line[256];
 
     while (fgets(line, sizeof(line), diskstats)) {
