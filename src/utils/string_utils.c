@@ -59,7 +59,7 @@ char* format_time(time_t raw_time) {
     if (!buffer) return NULL;
 
     struct tm *time_info = localtime(&raw_time);
-    strftime(buffer, 64, "%d %b %Y %H:%M", time_info);
+    strftime(buffer, 30, "%d %b %Y %H:%M", time_info);
 
     return buffer;
 }

@@ -125,15 +125,21 @@ void ui_draw_interface(const ApplicationState* state) {
 }
 
 void load_directory(Tab* tab) {
+    if (!tab || !tab->path) {
+        show_error_dialog("Invalid tab or path");
+        return;
+    }
+
     DIR* dir = opendir(tab->path);
     if (!dir) {
         show_error_dialog("Error opening directory");
+        return;
     }
 
     struct dirent* entry;
     tab->file_count = 0;
 
-    while (((entry = readdir(dir))) && tab->file_count < MAX_FILES_PER_DIR) {
+    while ((entry = readdir(dir)) != NULL  && tab->file_count < MAX_FILES_PER_DIR) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }

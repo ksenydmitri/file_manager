@@ -434,6 +434,7 @@ SystemInfo* check_disk_stat(const char* path) {
 
     if (statvfs(path, &fs_info) == -1) {
         show_error_dialog("Ошибка statvfs");
+        free(space_info);
         return NULL;
     }
 
