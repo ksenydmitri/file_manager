@@ -26,4 +26,7 @@
 #define MAX_SEARCH_RESULTS 100
 #define SECTOR_SIZE 512
 
+#define MIN_WINDOW_HEIGHT 10
+#define MIN_WINDOW_WIDTH 10
+
 #endif

@@ -61,6 +61,10 @@ static void draw_panel(WINDOW* win, const Tab* tab, int is_active) {
     int max_x;
     getmaxyx(win, max_y, max_x);
 
+    if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
+        return;
+    }
+
     if (is_active) {
         wattron(win, A_BOLD);
         box(win, 0, 0);

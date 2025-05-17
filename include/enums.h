@@ -40,7 +40,7 @@ typedef enum {
     KEY_ACTION_PASTE,
     KEY_ACTION_DELETE,
     KEY_ACTION_RENAME,
-    TOTAL_ACTIONS
+    TOTAL_ACTIMIN_WINDOW_HEIGHTONS
 } KeyAction;
 
 typedef enum {

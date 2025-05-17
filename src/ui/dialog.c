@@ -222,7 +222,7 @@ void show_file_dialog(ApplicationState* state, const char* path, FileEntry* entr
 void show_error_dialog(const char* message) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 60 ? 60 : max_x - 4;
+    int width = max_x > 60 ? 60 : (max_x - 4 > 10 ? max_x - 4 : 10);
     int height = 5;
 
     WINDOW* win = newwin(height, width, (max_y - height) / 2, (max_x - width) / 2);
