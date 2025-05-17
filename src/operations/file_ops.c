@@ -224,7 +224,7 @@ void perform_iterative_search(const char* root_directory, const char* query, Fil
     }
 }
 
-int is_duplicate(FileSearchResult* results, const char* path) {
+int is_duplicate(const FileSearchResult* results, const char* path) {
     if (!path || results->count == 0) return 0;
     const char* filename = strrchr(path, '/');
     filename = (filename != NULL) ? filename + 1 : path;
@@ -297,8 +297,8 @@ void process_file(const char* path,FILE* file) {
     int is_duplicate = 0;
     for (int i = 0; i < processed_count; i++) {
         if (processed_files[i].inode == st.st_ino) {
-            fprintf(file, "Duplicate file found (same inode %lu):\n  %s\n  %s\n",
-                   (unsigned long)st.st_ino, processed_files[i].path, path);
+            fprintf(file, "Duplicate file found:  %s  %s\n",
+                   processed_files[i].path, path);
             is_duplicate = 1;
         }
 
@@ -358,7 +358,7 @@ void process_single_directory(const char* path, char** dir_stack, int* stack_top
     DIR* dir = opendir(path);
     if (!dir) return;
 
-    struct dirent* entry;
+    const struct dirent* entry;
     while ((entry = readdir(dir))) {
         if (should_skip_entry(entry)) continue;
 
@@ -426,7 +426,7 @@ DiskStats get_disk_stats(const char* device) {
 
 void find_root_device(char* device) {
     DIR *dir = opendir("/sys/block");
-    struct dirent *entry;
+    const struct dirent *entry;
 
     while ((entry = readdir(dir))) {
         if (entry->d_type == DT_LNK &&
@@ -440,7 +440,8 @@ void find_root_device(char* device) {
 }
 
 void measure_io_speed(const char* device,SystemInfo* space_info) {
-    DiskStats stats1, stats2;
+    DiskStats stats1;
+    DiskStats stats2;
     double time_interval = 1.0;
 
     stats1 = get_disk_stats(device);

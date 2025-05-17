@@ -127,7 +127,7 @@ void navigate_down(ApplicationState* state) {
     }
 }
 
-void enter_directory(ApplicationState* state, Tab* tab, const FileEntry* entry) {
+void enter_directory(ApplicationState* state,Tab* tab, const FileEntry* entry) {
   	char *new_path = get_full_path(state,entry->name);
     strncpy(tab->path, new_path, MAX_PATH_LEN);
     load_directory(tab);
@@ -136,11 +136,11 @@ void enter_directory(ApplicationState* state, Tab* tab, const FileEntry* entry) 
     free(new_path);
 }
 
-void enter_file(Tab* tab, FileEntry* entry) {
+void enter_file(const Tab* tab,const FileEntry* entry) {
  	show_file_dialog(tab->path, entry);
 }
 
-void enter_symlink(ApplicationState* state, FileEntry* entry) {
+void enter_symlink(ApplicationState* state,const FileEntry* entry) {
     char *new_path = get_full_path(state,entry->name);
     int fd = open(new_path,O_RDONLY);
     if(fd == -1) {
