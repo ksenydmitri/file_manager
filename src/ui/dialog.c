@@ -91,7 +91,7 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
     getmaxyx(stdscr, max_y, max_x);
 
     if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
-        return;
+        return result;
     }
 
     int width = max_x > 50 ? 50 : max_x - 4;
@@ -190,7 +190,8 @@ void show_file_contents_dialog(const char* filepath) {
         int current_line = 0;
         while (fgets(buffer, sizeof(buffer), file)) {
             if (current_line >= scroll_offset && current_line < scroll_offset + height - padding) {
-                print_wrapped_text(dialog_win, line++, 2, buffer, width - 8);
+                print_wrapped_text(dialog_win, line, 2, buffer, width - 8);
+                line++;
             }
             current_line++;
         }
@@ -314,7 +315,8 @@ void show_search_result_dialog(FileSearchResult* results) {
     for (int i = 0; i < results->count; i++) {
         char truncated_path[256];
         truncate_filename(truncated_path, results->files[i].path, width - 4);
-        mvwprintw(dialog_win, line++, 2, "Path: %s", truncated_path);
+        mvwprintw(dialog_win, line, 2, "Path: %s", truncated_path);
+        line++;
     }
     wrefresh(dialog_win);
     wgetch(dialog_win);
@@ -539,11 +541,11 @@ void show_system_stat_dialog(ApplicationState *state) {
         "Write speed : %.2f MB/s",  space_info->write_speed);
     snprintf(system_type_buffer,sizeof(system_type_buffer),"Type FS: %s", space_info->entry->mnt_type);
 
-    print_truncated(win, line++, 2, total_space_buffer, width);
-    print_truncated(win, line++, 2, free_space_buffer, width);
-    print_truncated(win, line++, 2, available_space_buffer, width);
-    print_truncated(win, line++, 2, reed_speed_buffer, width);
-    print_truncated(win, line++, 2, write_speed_buffer, width);
+    print_truncated(win, line, 2, total_space_buffer, width); line++;
+    print_truncated(win, line, 2, free_space_buffer, width); line++;
+    print_truncated(win, line, 2, available_space_buffer, width); line++;
+    print_truncated(win, line, 2, reed_speed_buffer, width); line++;
+    print_truncated(win, line, 2, write_speed_buffer, width); line++;
     print_truncated(win, line,   2, system_type_buffer, width);
 
     const double MIN_SPACE_GB = 1.0;
