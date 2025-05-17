@@ -298,8 +298,8 @@ void show_create_object_dialog(ApplicationState* state) {
 void show_search_result_dialog(ApplicationState* state, FileSearchResult* results) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 80 ? 80 : max_x - 4;;
-    int height = max_y > 20 ? 20 : max_y - 4;
+    int width = max_x > 80 ? 80 : (max_x - 4 > 10 ? max_x - 4 : 10);
+    int height = max_y > 20 ? 20 : (max_y - 4 > 5 ? max_y - 4 : 5);
 
     const int start_x = (max_x - width) / 2;
     const int start_y = (max_y - height) / 2;
@@ -314,7 +314,8 @@ void show_search_result_dialog(ApplicationState* state, FileSearchResult* result
     box(dialog_win, 0, 0);
     int line = 2;
     for (int i = 0; i < results->count; i++) {
-        char truncated_path[width - 4];
+        char truncated_path[256];
+        int max_truncate = width - 4 > 0 ? width - 4 : 1;
         truncate_filename(truncated_path, results->files[i].path, width - 4);
         mvwprintw(dialog_win, line++, 2, "Path: %s", truncated_path);
     }

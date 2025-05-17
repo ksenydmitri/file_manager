@@ -85,6 +85,7 @@ void handle_actions(ApplicationState* state, int key) {
         break;
         case 'p':
             handle_misc(state);
+        break;
         default:
         break;
     }
