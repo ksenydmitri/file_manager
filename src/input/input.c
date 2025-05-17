@@ -140,7 +140,7 @@ void enter_file(ApplicationState* state, Tab* tab, FileEntry* entry) {
  	show_file_dialog(state, tab->path, entry);
 }
 
-void enter_symlink(ApplicationState* state, Tab* tab, FileEntry* entry) {
+void enter_symlink(ApplicationState* state, FileEntry* entry) {
     char *new_path = get_full_path(state,entry->name);
     int fd = open(new_path,O_RDONLY);
     if(fd == -1) {
@@ -153,7 +153,6 @@ void enter_symlink(ApplicationState* state, Tab* tab, FileEntry* entry) {
         } else {
             show_error_dialog("Can't read symlink");
         }
-        //show_file_dialog(state, tab->path, entry);
     }
     free(new_path);
 }
@@ -169,7 +168,7 @@ void enter_file_or_directory(ApplicationState* state) {
             enter_file(state, tab, entry);
             break;
       case FILE_SYMLINK:
-            enter_symlink(state, tab, entry);
+            enter_symlink(state, entry);
             break;
       case FILE_OTHER:
         break;

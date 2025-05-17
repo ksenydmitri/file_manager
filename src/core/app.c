@@ -37,10 +37,6 @@ void app_run(ApplicationState* state) {
     state->need_refresh = 1;
 }
 
-void app_cleanup(ApplicationState* state) {
-    // Для расширения: очистка динамических ресурсов
-}
-
 void app_refresh_current_tab(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     load_directory(tab);

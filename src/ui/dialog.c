@@ -144,8 +144,8 @@ void show_file_contents_dialog(const char* filepath) {
 
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 80 ? 80 : max_x - 4;;
-    int height = max_y > 20 ? 20 : max_y - 4;
+    int width = max_x > 80 ? 80 : (max_x - 4 > 10 ? max_x - 4 : 10);
+    int height = max_y > 20 ? 20 : (max_y - 4 > 5 ? max_y - 4 : 5);
     int padding = 2;
 
     const int start_x = (max_x - width) / 2;
