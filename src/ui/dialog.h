@@ -10,11 +10,11 @@ void show_create_object_dialog(ApplicationState* state);
 void show_search_dialog(ApplicationState* state);
 void show_file_dialog(const char* path, FileEntry* entry);
 void show_error_dialog( const char* message);
-void show_search_result_dialog(ApplicationState* state, FileSearchResult* results);
+void show_search_result_dialog(FileSearchResult* results);
 void show_rename_dialog(ApplicationState* state, FileEntry* entry);
 void show_change_permissions_dialog(ApplicationState* state, FileEntry* entry);
 void show_file_contents_dialog(const char* filepath);
 int show_change_owner_dialog(ApplicationState* state, FileEntry* entry);
-void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry);
+void show_file_entry_dialog( FileEntry* file_entry);
 void show_system_stat_dialog(ApplicationState *state);
 #endif

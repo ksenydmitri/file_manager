@@ -234,7 +234,7 @@ void handle_file_entry(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     FileEntry* entry = &tab->files[tab->selected];
     if (entry->type == FILE_REGULAR ) {
-        show_file_entry_dialog(state, entry);
+        show_file_entry_dialog(entry);
     } else {
         show_error_dialog("Selected object not file!");
         return;

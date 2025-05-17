@@ -89,6 +89,11 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
 
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
+
+    if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
+        return;
+    }
+
     int width = max_x > 50 ? 50 : max_x - 4;
     int height = max_y > 9 ? 9 : max_y - 4;
 
@@ -288,11 +293,11 @@ void show_create_object_dialog(ApplicationState* state) {
     }
 }
 
-void show_search_result_dialog(ApplicationState* state, FileSearchResult* results) {
+void show_search_result_dialog(FileSearchResult* results) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 80 ? 80 : (max_x - 4 > 10 ? max_x - 4 : 10);
-    int height = max_y > 20 ? 20 : (max_y - 4 > 5 ? max_y - 4 : 5);
+    int width = calculate_width(max_x);
+    int height = calculate_height(max_y);
 
     const int start_x = (max_x - width) / 2;
     const int start_y = (max_y - height) / 2;
@@ -308,7 +313,6 @@ void show_search_result_dialog(ApplicationState* state, FileSearchResult* result
     int line = 2;
     for (int i = 0; i < results->count; i++) {
         char truncated_path[256];
-        int max_truncate = width - 4 > 0 ? width - 4 : 1;
         truncate_filename(truncated_path, results->files[i].path, width - 4);
         mvwprintw(dialog_win, line++, 2, "Path: %s", truncated_path);
     }
@@ -331,7 +335,7 @@ void show_search_dialog(ApplicationState* state) {
         show_error_dialog("File not found.");
         return;
     } else {
-        show_search_result_dialog(state,&search_results);
+        show_search_result_dialog(&search_results);
     }
 
     refresh();
@@ -418,14 +422,11 @@ int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
     }
 }
 
-void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry) {
+void show_file_entry_dialog(FileEntry* file_entry) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
-        return;
-    }
-    int width = max_x > 80 ? 80 : max_x - 4;;
-    int height = 12;
+    int width = calculate_width(max_x);
+    int height = calculate_height(max_y);
 
     const int start_x = (max_x - width) / 2;
     const int start_y = (max_y - height) / 2;
@@ -439,24 +440,26 @@ void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry) {
     keypad(win, TRUE);
     box(win, 0, 0);
     int line = 2;
-    print_truncated(win,line++, 2,file_entry->name,width);
+    print_truncated(win,line, 2,file_entry->name,width);
+    line++;
     switch (file_entry->type) {
         case FILE_REGULAR:
-            print_truncated(win,line++, 2,"type: F",width);
+            print_truncated(win,line, 2,"type: F",width);
         break;
         case FILE_DIRECTORY:
-            print_truncated(win,line++, 2,"type: D",width);
+            print_truncated(win,line, 2,"type: D",width);
         break;
         case FILE_SYMLINK:
-            print_truncated(win,line++, 2,"type: S",width);
+            print_truncated(win,line, 2,"type: S",width);
         break;
         case FILE_OTHER:
-            print_truncated(win,line++, 2,"type: O",width);
+            print_truncated(win,line, 2,"type: O",width);
         break;
         default:
-            print_truncated(win,line++, 2,"type: ?",width);
+            print_truncated(win,line, 2,"type: ?",width);
         break;
     }
+    line++;
     char gid_str[32];
     char uid_str[32];
     char size_str[32];
@@ -481,10 +484,10 @@ void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry) {
         snprintf(mtime_str, sizeof(mtime_str), "mtime: error");
     }
 
-    print_truncated(win, line++, 2, gid_str, width);
-    print_truncated(win, line++, 2, uid_str, width);
-    print_truncated(win, line++, 2, size_str, width);
-    print_truncated(win, line++, 2, mode_str, width);
+    print_truncated(win, line, 2, gid_str, width); line++;
+    print_truncated(win, line, 2, uid_str, width); line++;
+    print_truncated(win, line, 2, size_str, width); line++;
+    print_truncated(win, line, 2, mode_str, width); line++;
     print_truncated(win, line, 2, mtime_str, width);
 
     print_truncated(win, height-2, 2, "Press any key...", width);
