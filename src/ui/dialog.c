@@ -130,6 +130,7 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
             break;
         case DIALOG_ENTRY:
             handle_entry_dialog(dialog_win, height, &result);
+            break;
         default:
             show_error_dialog("Unknown dialog type");
             break;
