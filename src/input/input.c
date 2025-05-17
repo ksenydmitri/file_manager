@@ -25,10 +25,10 @@ void enter_file_or_directory(ApplicationState* state);
 void handle_rename(ApplicationState* state);
 void handle_change_permissions(ApplicationState* state);
 void handle_change_owner(ApplicationState* state);
-void handle_file_entry(ApplicationState* state);
+void handle_file_entry(const ApplicationState* state);
 void handle_search_anomaly(ApplicationState* state);
 void handle_check_system_stat(ApplicationState* state);
-void handle_misc(ApplicationState* state);
+void handle_misc(const ApplicationState* state);
 
 void handle_actions(ApplicationState* state, int key) {
     switch (key) {
@@ -91,7 +91,7 @@ void handle_actions(ApplicationState* state, int key) {
     }
 }
 
-void handle_misc(ApplicationState* state) {
+void handle_misc(const ApplicationState* state) {
         show_search_dialog(state);
 }
 
@@ -220,8 +220,8 @@ void handle_paste_operation(ApplicationState* state) {
 }
 
 void handle_change_permissions(ApplicationState* state) {
-    Tab* tab = &state->tabs[state->active_tab];
-    FileEntry* entry = &tab->files[tab->selected];
+    const Tab* tab = &state->tabs[state->active_tab];
+    const FileEntry* entry = &tab->files[tab->selected];
     if (entry->type == FILE_REGULAR ) {
         show_change_permissions_dialog(state, entry);
     } else {
@@ -230,9 +230,9 @@ void handle_change_permissions(ApplicationState* state) {
     }
 }
 
-void handle_file_entry(ApplicationState* state) {
-    Tab* tab = &state->tabs[state->active_tab];
-    FileEntry* entry = &tab->files[tab->selected];
+void handle_file_entry(const ApplicationState* state) {
+    const Tab* tab = &state->tabs[state->active_tab];
+    const FileEntry* entry = &tab->files[tab->selected];
     if (entry->type == FILE_REGULAR ) {
         show_file_entry_dialog(entry);
     } else {
