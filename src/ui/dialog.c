@@ -54,10 +54,6 @@ static void handle_input_dialog(WINDOW* win, int height, DialogResult* result) {
     result->confirmed = 1;
 }
 
-static void handle_entry_dialog(WINDOW *win,int height,DialogResult *result) {
-
-}
-
 static void handle_error_dialog(WINDOW* win, int height) {
     print_truncated(win, height-2, 2, "Press any key...", 20);
     wrefresh(win);
@@ -214,9 +210,9 @@ void show_file_contents_dialog(const char* filepath) {
 }
 
 void show_file_dialog(ApplicationState* state, const char* path, FileEntry* entry) {
-    const char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
+    char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
     show_file_contents_dialog(full_path);
-    free((void*)full_path);
+    free(full_path);
 }
 
 void show_error_dialog(const char* message) {
@@ -500,7 +496,11 @@ void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry) {
 void show_system_stat_dialog(ApplicationState *state) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 80 ? 80 : max_x - 4;;
+    if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
+        return;
+    }
+
+    int width = max_x > 80 ? 80 : max_x - 4;
     int height = 12;
 
     const int start_x = (max_x - width) / 2;
