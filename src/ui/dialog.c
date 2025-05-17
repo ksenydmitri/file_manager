@@ -335,6 +335,7 @@ void show_search_dialog(ApplicationState* state) {
 
     if (search_results.count == 0) {
         show_error_dialog("File not found.");
+        return;
     } else {
         show_search_result_dialog(state,&search_results);
     }
@@ -350,27 +351,28 @@ void show_rename_dialog(ApplicationState* state, FileEntry* entry) {
         return;
     }
 
-    const char *old_path = get_full_path(state, entry->name);
-    const char *new_path = get_full_path(state, result.input);
+    char *old_path = get_full_path(state, entry->name);
+    char *new_path = get_full_path(state, result.input);
 
     if (rename_file(old_path, new_path) == 0) {
         show_dialog(DIALOG_ERROR, "Success", "File renamed successfully!");
         load_directory(&state->tabs[state->active_tab]);
     } else {
         show_error_dialog("Failed to rename file.");
+        return;
     }
-    free((void*)old_path);
-    free((void*)new_path);
+    free(old_path);
+    free(new_path);
 }
 
 void show_change_permissions_dialog(ApplicationState* state, FileEntry* entry) {
-    const char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
+    char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
 
     DialogResult result = show_dialog(DIALOG_INPUT, "Change Permissions", "Enter permission (e.g., 755):");
 
     if (!result.confirmed || strlen(result.input) == 0) {
         show_error_dialog("Permission cannot be empty.");
-        free((void*)full_path);
+        free(full_path);
         return;
     }
 
@@ -378,27 +380,27 @@ void show_change_permissions_dialog(ApplicationState* state, FileEntry* entry) {
 
     if (chmod(full_path, new_mode) != 0) {
         show_error_dialog("Failed to change permissions.");
-        free((void*)full_path);
+        free(full_path);
     } else {
         show_dialog(DIALOG_ERROR, "Success", "Permissions updated successfully!");
-        free((void*)full_path);
+        free(full_path);
     }
 }
 
 int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
-    const char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
+    char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
 
     DialogResult result_user = show_dialog(DIALOG_INPUT, "Change Owner", "Enter new owner username:");
     if (!result_user.confirmed || strlen(result_user.input) == 0) {
         show_error_dialog("Owner cannot be empty.");
-        free((void*)full_path);
+        free(full_path);
         return 1;
     }
 
     DialogResult result_group = show_dialog(DIALOG_INPUT, "Change Group", "Enter new group name:");
     if (!result_group.confirmed || strlen(result_group.input) == 0) {
         show_error_dialog("Group cannot be empty.");
-        free((void*)full_path);
+        free(full_path);
         return 1;
     }
 
@@ -407,17 +409,17 @@ int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
 
     if (!pwd || !grp) {
         show_error_dialog("Invalid username or group name.");
-        free((void*)full_path);
+        free(full_path);
         return 1;
     }
 
     if (chown(full_path, pwd->pw_uid, grp->gr_gid) != 0) {
         show_error_dialog("Failed to change owner.");
-        free((void*)full_path);
+        free(full_path);
         return 1;
     } else {
         show_dialog(DIALOG_ERROR, "Success", "Owner and group updated successfully!");
-        free((void*)full_path);
+        free(full_path);
         return 0;
     }
 }

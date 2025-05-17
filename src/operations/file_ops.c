@@ -78,7 +78,7 @@ int dir_delete_recursive(const char* path) {
         snprintf(full_path, MAX_PATH_LEN, "%s/%s", path, entry->d_name);
 
         if (delete_path(full_path) != 0) {
-            ret = -1; // Запоминаем ошибку, но продолжаем обработку остальных файлов
+            ret = -1;
         }
     }
 
@@ -330,6 +330,7 @@ void iterate_filesystem(const char* root_dir) {
     FILE* file = fopen("result.txt", "w");
     if (file == NULL) {
         show_error_dialog("Can't open results file");
+        return;
     }
     DIR* dir;
     struct dirent* entry;
@@ -379,6 +380,12 @@ struct mntent* get_file_system_mntent() {
 
 DiskStats get_disk_stats(const char* device) {
     FILE* diskstats = fopen("/proc/diskstats", "r");
+
+    if (diskstats == NULL) {
+    show_error_dialog("Can't open /proc/diskstats");
+    return ;
+    }
+
     DiskStats stats = {0};
     char line[256];
 

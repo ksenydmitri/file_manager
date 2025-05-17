@@ -28,6 +28,7 @@ void handle_change_owner(ApplicationState* state);
 void handle_file_entry(ApplicationState* state);
 void handle_search_anomaly(ApplicationState* state);
 void handle_check_system_stat(ApplicationState* state);
+void handle_misc(ApplicationState* state);
 
 void handle_actions(ApplicationState* state, int key) {
     switch (key) {
@@ -82,15 +83,15 @@ void handle_actions(ApplicationState* state, int key) {
         case KEY_RIGHT:
             state->active_tab = (state->active_tab < MAX_TABS - 1) ? state->active_tab + 1 : MAX_TABS - 1;
         break;
+        case 'p':
+            handle_misc(state);
         default:
-            show_error_dialog("Unrecognized key");
+        break;
     }
 }
 
-void handle_misc(ApplicationState* state, int key) {
-    if (key == 'p') {
+void handle_misc(ApplicationState* state) {
         show_search_dialog(state);
-    }
 }
 
 void handle_rename(ApplicationState* state) {
@@ -100,8 +101,6 @@ void handle_rename(ApplicationState* state) {
 
 void handle_input(ApplicationState* state, int key) {
     handle_actions(state, key);
-    handle_misc(state, key);
-
     state->need_refresh = 1;
 }
 
