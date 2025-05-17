@@ -14,5 +14,4 @@ char *format_time(time_t raw_time);
 char* format_permissions(mode_t mode);
 int calculate_width(int max_x);
 int calculate_height(int max_y);
-int safe_strcopy(char* dest, size_t dest_size, const char* src);
 #endif

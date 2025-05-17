@@ -33,11 +33,3 @@ char* get_full_path(ApplicationState *state,const char *name) {
     snprintf(full_path, MAX_PATH_LEN, "%s/%s", state->tabs[state->active_tab].path,name);
     return full_path;
 }
-
-int validate_path(const char* path) {
-    if (!path || strlen(path) >= MAX_PATH_LEN) {
-        error_handle(ERR_INVALID_ARG, __FILE__, __LINE__, "Invalid path");
-        return -1;
-    }
-    return 0;
-}

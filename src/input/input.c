@@ -27,7 +27,7 @@ void handle_change_permissions(ApplicationState* state);
 void handle_change_owner(ApplicationState* state);
 void handle_file_entry(const ApplicationState* state);
 void handle_search_anomaly(ApplicationState* state);
-void handle_check_system_stat(const ApplicationState* state);
+void handle_check_system_stat(ApplicationState* state);
 void handle_misc(const ApplicationState* state);
 
 void handle_actions(ApplicationState* state, int key) {
@@ -247,7 +247,7 @@ void handle_search_anomaly(ApplicationState* state) {
     show_file_contents_dialog(get_full_path(state, "results.txt"));
 }
 
-void handle_check_system_stat(const ApplicationState* state) {
+void handle_check_system_stat(ApplicationState* state) {
     show_system_stat_dialog(state);
 }
 
