@@ -1,7 +1,0 @@
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/file_manager.dir
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/list_install_components.dir
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/install.dir
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/install/local.dir
-/home/kseny_dmitri/tar_working_dir/file_manager/cmake-build-debug/CMakeFiles/install/strip.dir
