@@ -16,5 +16,5 @@ void show_change_permissions_dialog(ApplicationState* state,const FileEntry* ent
 void show_file_contents_dialog(const char* filepath);
 int show_change_owner_dialog(ApplicationState* state, FileEntry* entry);
 void show_file_entry_dialog(const FileEntry* file_entry);
-void show_system_stat_dialog(ApplicationState *state);
+void show_system_stat_dialog(const ApplicationState *state);
 #endif

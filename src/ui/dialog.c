@@ -503,8 +503,9 @@ void show_file_entry_dialog(const FileEntry* file_entry) {
     delwin(win);
 }
 
-void show_system_stat_dialog(ApplicationState *state) {
-    int max_y, max_x;
+void show_system_stat_dialog(const ApplicationState *state) {
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
     if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
         return;

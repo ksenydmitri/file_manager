@@ -38,7 +38,8 @@ void ui_cleanup() {
 }
 
 void ui_handle_resize() {
-    int max_y, max_x;
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
 
     if(left_win) delwin(left_win);
