@@ -144,8 +144,8 @@ void show_file_contents_dialog(const char* filepath) {
 
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 80 ? 80 : (max_x - 4 > 10 ? max_x - 4 : 10);
-    int height = max_y > 20 ? 20 : (max_y - 4 > 5 ? max_y - 4 : 5);
+    int width = calculate_width(max_x);
+    int height = calculate_height(max_y);
     int padding = 2;
 
     const int start_x = (max_x - width) / 2;
@@ -206,8 +206,8 @@ void show_file_contents_dialog(const char* filepath) {
     delwin(dialog_win);
 }
 
-void show_file_dialog(ApplicationState* state, const char* path, FileEntry* entry) {
-    char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
+void show_file_dialog(const char* path, FileEntry* entry) {
+    char *full_path = get_full_path(path, entry->name);
     show_file_contents_dialog(full_path);
     free(full_path);
 }
@@ -215,7 +215,7 @@ void show_file_dialog(ApplicationState* state, const char* path, FileEntry* entr
 void show_error_dialog(const char* message) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
-    int width = max_x > 60 ? 60 : (max_x - 4 > 10 ? max_x - 4 : 10);
+    int width = 60;
     int height = 5;
 
     WINDOW* win = newwin(height, width, (max_y - height) / 2, (max_x - width) / 2);

@@ -12,5 +12,6 @@ void str_copy(char* dest, const char* src, size_t max_len);
 void truncate_filename(char* dest, const char* src, size_t max_len);
 char *format_time(time_t raw_time);
 char* format_permissions(mode_t mode);
-
+int calculate_width(int max_x);
+int calculate_height(int max_y);
 #endif

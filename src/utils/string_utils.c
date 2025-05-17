@@ -81,3 +81,29 @@ char* format_permissions(mode_t mode) {
            (mode & S_IXOTH) ? 'x' : '-');
     return buffer;
 }
+
+int calculate_width(int max_x) {
+    const int max_width = 80;
+    const int min_width = 10;
+    const int padding = 4;
+
+    if (max_x > max_width) {
+        return max_width;
+    }
+
+    int reduced_width = max_x - padding;
+    return (reduced_width > min_width) ? reduced_width : min_width;
+}
+
+int calculate_height(int max_y) {
+    const int max_height = 20;
+    const int min_height = 5;
+    const int padding = 4;
+
+    if (max_y > max_height) {
+        return max_height;
+    }
+
+    int reduced_height = max_y - padding;
+    return (reduced_height > min_height) ? reduced_height : min_height;
+}

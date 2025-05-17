@@ -289,11 +289,9 @@ void process_file(const char* path,FILE* file) {
     }
 
     int is_broken_link = 0;
-    if (S_ISLNK(st.st_mode)) {
-        if (stat(path, &st) == -1) {
-            is_broken_link = 1;
-            fprintf(file, "Broken symlink found: %s\n", path);
-        }
+    if (S_ISLNK(st.st_mode) && stat(path, &st) == -1) {
+        is_broken_link = 1;
+        fprintf(file, "Broken symlink found: %s\n", path);
     }
 
     int is_duplicate = 0;

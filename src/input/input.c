@@ -136,8 +136,8 @@ void enter_directory(ApplicationState* state, Tab* tab, const FileEntry* entry) 
     free(new_path);
 }
 
-void enter_file(ApplicationState* state, Tab* tab, FileEntry* entry) {
- 	show_file_dialog(state, tab->path, entry);
+void enter_file(Tab* tab, FileEntry* entry) {
+ 	show_file_dialog(tab->path, entry);
 }
 
 void enter_symlink(ApplicationState* state, FileEntry* entry) {
@@ -165,7 +165,7 @@ void enter_file_or_directory(ApplicationState* state) {
             enter_directory(state, tab, entry);
             break;
       case FILE_REGULAR:
-            enter_file(state, tab, entry);
+            enter_file(tab, entry);
             break;
       case FILE_SYMLINK:
             enter_symlink(state, entry);
