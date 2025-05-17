@@ -159,7 +159,7 @@ void enter_symlink(ApplicationState* state,const FileEntry* entry) {
 
 void enter_file_or_directory(ApplicationState* state) {
   	Tab* tab = &state->tabs[state->active_tab];
-    FileEntry* entry = &tab->files[tab->selected];
+    const FileEntry* entry = &tab->files[tab->selected];
     switch(entry->type) {
       case FILE_DIRECTORY:
             enter_directory(state, tab, entry);
@@ -202,9 +202,9 @@ void handle_create_operation(ApplicationState* state) {
 }
 
 void handle_copy_operation(ApplicationState* state) {
-    Tab* tab = &state->tabs[state->active_tab];
+    const Tab* tab = &state->tabs[state->active_tab];
     if (tab->selected < tab->file_count) {
-        FileEntry* entry = &tab->files[tab->selected];
+        const FileEntry* entry = &tab->files[tab->selected];
         char *full_path = get_full_path(state,entry->name);
         copy_to_clipboard(&state->clipboard, full_path, OP_COPY);
         free(full_path);
@@ -242,7 +242,7 @@ void handle_file_entry(ApplicationState* state) {
 }
 
 void handle_search_anomaly(ApplicationState* state) {
-    Tab* tab = &state->tabs[state->active_tab];
+    const Tab* tab = &state->tabs[state->active_tab];
     iterate_filesystem(tab->path);
     show_file_contents_dialog(get_full_path(state, "results.txt"));
 }
@@ -255,7 +255,7 @@ void delete_selected(ApplicationState* state) {
     Tab* tab = &state->tabs[state->active_tab];
     if (tab->selected >= tab->file_count) return;
 
-    FileEntry* entry = &tab->files[tab->selected];
+    const FileEntry* entry = &tab->files[tab->selected];
     char *path = get_full_path(state,entry->name);
 
     if (delete_path(path) != 0) {

@@ -87,7 +87,8 @@ static void handle_confirm_dialog(WINDOW* win, int height, DialogResult* result)
 DialogResult show_dialog(DialogType type, const char* title, const char* message) {
     DialogResult result = {0};
 
-    int max_y, max_x;
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
 
     if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
@@ -147,7 +148,8 @@ void show_file_contents_dialog(const char* filepath) {
         return;
     }
 
-    int max_y, max_x;
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
     int width = calculate_width(max_x);
     int height = calculate_height(max_y);
@@ -212,14 +214,15 @@ void show_file_contents_dialog(const char* filepath) {
     delwin(dialog_win);
 }
 
-void show_file_dialog(const char* path, FileEntry* entry) {
+void show_file_dialog(const char* path,const FileEntry* entry) {
     char *full_path = get_full_path(path, entry->name);
     show_file_contents_dialog(full_path);
     free(full_path);
 }
 
 void show_error_dialog(const char* message) {
-    int max_y, max_x;
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
     int width = 60;
     int height = 5;
@@ -294,8 +297,9 @@ void show_create_object_dialog(ApplicationState* state) {
     }
 }
 
-void show_search_result_dialog(FileSearchResult* results) {
-    int max_y, max_x;
+void show_search_result_dialog(const FileSearchResult* results) {
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
     int width = calculate_width(max_x);
     int height = calculate_height(max_y);
@@ -323,7 +327,7 @@ void show_search_result_dialog(FileSearchResult* results) {
     delwin(dialog_win);
 }
 
-void show_search_dialog(ApplicationState* state) {
+void show_search_dialog(const ApplicationState* state) {
     DialogResult result = show_dialog(DIALOG_INPUT, "Search Files", "Enter file name to search:");
 
     if (!result.confirmed || strlen(result.input) == 0) {
@@ -343,7 +347,7 @@ void show_search_dialog(ApplicationState* state) {
     refresh();
 }
 
-void show_rename_dialog(ApplicationState* state, FileEntry* entry) {
+void show_rename_dialog(ApplicationState* state,const FileEntry* entry) {
     DialogResult result = show_dialog(DIALOG_INPUT, "Rename File", "Enter new file name:");
 
     if (!result.confirmed || strlen(result.input) == 0) {
@@ -365,7 +369,7 @@ void show_rename_dialog(ApplicationState* state, FileEntry* entry) {
     free(new_path);
 }
 
-void show_change_permissions_dialog(ApplicationState* state, FileEntry* entry) {
+void show_change_permissions_dialog(ApplicationState* state,const FileEntry* entry) {
     char *full_path = get_full_path(state->tabs[state->active_tab].path, entry->name);
 
     DialogResult result = show_dialog(DIALOG_INPUT, "Change Permissions", "Enter permission (e.g., 755):");
@@ -424,8 +428,9 @@ int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
     }
 }
 
-void show_file_entry_dialog(FileEntry* file_entry) {
-    int max_y, max_x;
+void show_file_entry_dialog(const FileEntry* file_entry) {
+    int max_y;
+    int max_x;
     getmaxyx(stdscr, max_y, max_x);
     int width = calculate_width(max_x);
     int height = calculate_height(max_y);
