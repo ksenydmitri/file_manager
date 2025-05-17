@@ -242,9 +242,10 @@ void handle_file_entry(const ApplicationState* state) {
 }
 
 void handle_search_anomaly(ApplicationState* state) {
-    const Tab* tab = &state->tabs[state->active_tab];
-    iterate_filesystem(tab->path);
-    show_file_contents_dialog(get_full_path(state, "results.txt"));
+    Tab* tab = &state->tabs[state->active_tab];
+    iterate_filesystem(state,tab->path);
+    show_file_contents_dialog(get_full_path(state, "result.txt"));
+    load_directory(tab);
 }
 
 void handle_check_system_stat(ApplicationState* state) {

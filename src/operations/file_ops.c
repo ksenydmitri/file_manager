@@ -382,8 +382,9 @@ void process_directory_recursively(const char* current_dir, FILE* output_file) {
     }
 }
 
-void iterate_filesystem(const char* root_dir) {
-    FILE* file = fopen("result.txt", "w");
+void iterate_filesystem(ApplicationState *state,const char* root_dir) {
+
+    FILE* file = fopen((get_full_path(state,"result.txt")), "w");
     if (file == NULL) {
         show_error_dialog("Can't open results file");
         return;

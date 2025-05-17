@@ -20,7 +20,7 @@ int rename_file(const char* old_name, const char* new_name);
 int change_permissions(const char* path, mode_t mode);
 int change_owner(const char* path, uid_t owner, gid_t group);
 void perform_file_search(const char* initial_directory, const char* target_name, FileSearchResult* results);
-void iterate_filesystem(const char* root_dir);
+void iterate_filesystem(ApplicationState *state,const char* root_dir) ;
 SystemInfo* check_disk_stat(const char* path);
 
 #endif // FILE_OPS_H
