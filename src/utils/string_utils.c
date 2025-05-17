@@ -108,3 +108,12 @@ int calculate_height(int max_y) {
     int reduced_height = max_y - padding;
     return (reduced_height > min_height) ? reduced_height : min_height;
 }
+
+int safe_strcopy(char* dest, size_t dest_size, const char* src) {
+    if (!dest || !src || dest_size == 0) return -1;
+    size_t len = strnlen(src, dest_size);
+    if (len >= dest_size) return -1;
+    memcpy(dest, src, len);
+    dest[len] = '\0';
+    return 0;
+}

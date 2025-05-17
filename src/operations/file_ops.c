@@ -23,38 +23,40 @@ static FileInfo processed_files[MAX_SEARCH_RESULTS];
 static int processed_count = 0;
 
 int file_create(const char* path) {
-    FILE* fp = fopen(path, "w");
-    if (!fp) return -1;
+    if (validate_path(path) != 0) return -1;
+
+    FILE* fp = fopen(path, "wx");
+    if (!fp) {
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, strerror(errno));
+        return -1;
+    }
     fclose(fp);
     return 0;
 }
 
+
 int dir_create(const char* path) {
+    if (validate_path(path) != 0) return -1;
     return mkdir(path, 0755);
 }
 
-int delete_path(const char* path) {
-    struct stat st;
 
+int delete_path(const char* path) {
+    if (validate_path(path) != 0) return -1;
+
+    struct stat st;
     if (lstat(path, &st) != 0) {
-        char error_msg[MAX_PATH_LEN + 50];
-        snprintf(error_msg, sizeof(error_msg), "Failed to get file info: %s", path);
-        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, strerror(errno));
         return -1;
     }
 
-    if (S_ISDIR(st.st_mode)) {
-        return dir_delete_recursive(path);
-    } else {
-        return file_delete(path);
-    }
+    return S_ISDIR(st.st_mode) ? dir_delete_recursive(path) : file_delete(path);
 }
 
 int file_delete(const char* path) {
+    if (validate_path(path) != 0) return -1;
     if (unlink(path) == -1) {
-        char error_msg[MAX_PATH_LEN + 50];
-        snprintf(error_msg, sizeof(error_msg), "Failed to delete file: %s", path);
-        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, strerror(errno));
         return -1;
     }
     return 0;
@@ -63,85 +65,84 @@ int file_delete(const char* path) {
 int dir_delete_recursive(const char* path) {
     DIR* dir = opendir(path);
     if (!dir) {
-        char error_msg[MAX_PATH_LEN + 50];
-        snprintf(error_msg, sizeof(error_msg), "Cannot open directory: %s", path);
-        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, strerror(errno));
         return -1;
     }
 
     struct dirent* entry;
     int ret = 0;
+    char full_path[MAX_PATH_LEN];
 
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-            continue; // Пропуск "." и ".."
-        }
+    while ((entry = readdir(dir)) && ret == 0) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
 
-        char full_path[MAX_PATH_LEN];
-        snprintf(full_path, MAX_PATH_LEN, "%s/%s", path, entry->d_name);
-
-        if (delete_path(full_path) != 0) {
-            ret = -1;
-        }
+        snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+        ret = delete_path(full_path);
     }
 
     closedir(dir);
-
     if (ret == 0 && rmdir(path) != 0) {
-        char error_msg[MAX_PATH_LEN + 50];
-        snprintf(error_msg, sizeof(error_msg), "Failed to delete directory: %s", path);
-        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, error_msg);
-        return -1;
+        error_handle(ERR_IO_FAILURE, __FILE__, __LINE__, strerror(errno));
+        ret = -1;
     }
-
     return ret;
 }
 
 int file_copy(const char* src, const char* dest) {
-    FILE* source = fopen(src, "rb");
+    if (validate_path(src) != 0 || validate_path(dest) != 0) return -1;
+
+    FILE *source = fopen(src, "rb");
     if (!source) return -1;
 
-    FILE* destination = fopen(dest, "wb");
+    FILE *destination = fopen(dest, "wbx");
     if (!destination) {
         fclose(source);
         return -1;
     }
 
-    char buffer[4096];
+    unsigned char buffer[4096];
     size_t bytes;
+    int ret = 0;
+
     while ((bytes = fread(buffer, 1, sizeof(buffer), source)) > 0) {
-        fwrite(buffer, 1, bytes, destination);
+        if (fwrite(buffer, 1, bytes, destination) != bytes) {
+            ret = -1;
+            break;
+        }
     }
 
     fclose(source);
     fclose(destination);
-    return 0;
+    return ret;
 }
 
 int file_move(const char* src, const char* dest) {
-    return rename(src, dest);
+    if (validate_path(src) != 0 || validate_path(dest) != 0) return -1;
+    if (rename(src, dest) == 0) return 0;
+
+    if (errno == EXDEV) {
+        if (file_copy(src, dest) == 0) {
+            return file_delete(src);
+        }
+    }
+    return -1;
 }
 
-int get_file_info(const char* path, FileEntry* entry) {
-    struct stat st;
-    if (lstat(path, &st) != 0) {
-        return -1;
-    }
 
-    if (S_ISREG(st.st_mode)) {
-        entry->type = FILE_REGULAR;
-    } else if (S_ISDIR(st.st_mode)) {
-        entry->type = FILE_DIRECTORY;
-    } else if (S_ISLNK(st.st_mode)) {
-        entry->type = FILE_SYMLINK;
-    } else {
-        entry->type = FILE_OTHER;
-    }
+int get_file_info(const char* path, FileEntry* entry) {
+    if (validate_path(path) != 0 || !entry) return -1;
+
+    struct stat st;
+    if (lstat(path, &st) != 0) return -1;
+
+    entry->type = S_ISREG(st.st_mode) ? FILE_REGULAR :
+                 S_ISDIR(st.st_mode) ? FILE_DIRECTORY :
+                 S_ISLNK(st.st_mode) ? FILE_SYMLINK : FILE_OTHER;
 
     const char* filename = strrchr(path, '/');
-    filename = (filename != NULL) ? filename + 1 : path;
-    strncpy(entry->name, filename, MAX_FILENAME_LEN - 1);
-    entry->name[MAX_FILENAME_LEN - 1] = '\0';
+    filename = filename ? filename + 1 : path;
+    safe_strcopy(entry->name, MAX_FILENAME_LEN, filename);
 
     entry->size = st.st_size;
     entry->mode = st.st_mode;
@@ -243,17 +244,36 @@ int is_duplicate(const FileSearchResult* results, const char* path) {
 
 
 
-void perform_file_search(const char* initial_directory, const char* target_name, FileSearchResult* results) {
+void perform_file_search(const char* initial_directory, const char* target_name,
+                       FileSearchResult* results) {
+    if (!initial_directory || !target_name || !results) return;
+
     results->count = 0;
-    search_files(initial_directory, target_name, results);
-    perform_iterative_search(initial_directory, target_name, results);
-    FileSearchResult filtered_results = {0};
-    for (int i = 0; i < results->count; i++) {
-        if (!is_duplicate(&filtered_results, results->files[i].path)) {
-            filtered_results.files[filtered_results.count++] = results->files[i];
+    DIR* dir = opendir(initial_directory);
+    if (!dir) return;
+
+    struct dirent* entry;
+    char full_path[MAX_PATH_LEN];
+
+    while ((entry = readdir(dir)) && results->count < MAX_SEARCH_RESULTS) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        snprintf(full_path, sizeof(full_path), "%s/%s", initial_directory, entry->d_name);
+
+        struct stat st;
+        if (stat(full_path, &st) != 0) continue;
+
+        if (S_ISREG(st.st_mode) && strstr(entry->d_name, target_name)) {
+            if (safe_strcopy(results->files[results->count].name,
+                           MAX_FILENAME_LEN, entry->d_name) == 0 &&
+                safe_strcopy(results->files[results->count].path,
+                           MAX_PATH_LEN, full_path) == 0) {
+                results->count++;
+                           }
         }
     }
-    *results = filtered_results;
+    closedir(dir);
 }
 
 int rename_file(const char* old_name, const char* new_name) {
@@ -484,4 +504,11 @@ SystemInfo* check_disk_stat(const char* path) {
     find_root_device(device);
     measure_io_speed(device,space_info);
     return space_info;
+}
+
+void cleanup_file_ops() {
+    for (int i = 0; i < processed_count; i++) {
+        memset(&processed_files[i], 0, sizeof(FileInfo));
+    }
+    processed_count = 0;
 }
