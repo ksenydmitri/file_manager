@@ -278,8 +278,9 @@ int change_owner(const char* path, uid_t owner, gid_t group) {
 }
 
 void process_file(const char* path,FILE* file) {
+
     struct stat st;
-    if (lstat(path, &st) == -1) {
+    if (lstat(path, &st) == -1 || file == NULL) {
         show_error_dialog( "Error accessing file");
         return;
     }
