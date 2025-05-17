@@ -31,14 +31,17 @@
 ```bash
 # Установка зависимостей (Debian/Ubuntu)
 sudo apt install libncurses5-dev gcc make git
-
+```
 # Сборка и запуск 
-
+```
 git clone https://github.com/ksenydmitri/fileManager.git
 cd file_manager
 make all
 ./build/bin/file_manager
-
+make clean      # Очистка билдов
+make debug      # Сборка с отладочной информацией
+make install    # Установка в систему (требует прав)
+``
 
 ##Использование
 #Основные клавиши
@@ -58,11 +61,3 @@ F9	Выход из приложения
 S   Статистика о файловой системе
 P   Поиск файла
 CTRL + I или TAB Поиск аномалий(повторяющиеся файлы, давно неипользуемые файлы и поиск битых симлинков)
-
-#Сборка из исходников
-bash
-Copy
-
-make clean      # Очистка билдов
-make debug      # Сборка с отладочной информацией
-make install    # Установка в систему (требует прав)
