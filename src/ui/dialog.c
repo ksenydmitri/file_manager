@@ -124,9 +124,6 @@ DialogResult show_dialog(DialogType type, const char* title, const char* message
         case DIALOG_ERROR:
             handle_error_dialog(dialog_win, height);
             break;
-        case DIALOG_ENTRY:
-            handle_entry_dialog(dialog_win, height, &result);
-            break;
         default:
             show_error_dialog("Unknown dialog type");
             break;
@@ -424,6 +421,9 @@ int show_change_owner_dialog(ApplicationState *state, FileEntry *entry) {
 void show_file_entry_dialog(ApplicationState *state, FileEntry* file_entry) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
+    if (max_x < MIN_WINDOW_WIDTH || max_y < MIN_WINDOW_HEIGHT) {
+        return;
+    }
     int width = max_x > 80 ? 80 : max_x - 4;;
     int height = 12;
 

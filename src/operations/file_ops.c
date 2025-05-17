@@ -16,6 +16,9 @@
 #include "../utils/string_utils.h"
 #include "../utils/path_utils.h"
 
+
+void process_file(const char* path, FILE* output);
+
 static FileInfo processed_files[MAX_SEARCH_RESULTS];
 static int processed_count = 0;
 
@@ -325,6 +328,61 @@ void process_file(const char* path,FILE* file) {
     }
 }
 
+void add_directory_to_stack(const char* path, char** dir_stack, int* stack_top) {
+    if (*stack_top < MAX_DIRECTORIES) {
+        dir_stack[(*stack_top)++] = strdup(path);
+    }
+}
+
+void process_path(const char* path, char** dir_stack, int* stack_top, FILE* output) {
+    struct stat st;
+    if (stat(path, &st)) return;
+
+    if (S_ISDIR(st.st_mode)) {
+        add_directory_to_stack(path, dir_stack, stack_top);
+    } else {
+        process_file(path, output);
+    }
+}
+
+void build_full_path(const char* dir, const char* name, char* buffer) {
+    snprintf(buffer, MAX_PATH_LEN, "%s/%s", dir, name);
+}
+
+int  should_skip_entry(const struct dirent* entry) {
+    if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+    return 1;
+    }
+    return 0;
+}
+
+void process_single_directory(const char* path, char** dir_stack, int* stack_top, FILE* output) {
+    DIR* dir = opendir(path);
+    if (!dir) return;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir))) {
+        if (should_skip_entry(entry)) continue;
+
+        char full_path[MAX_PATH_LEN];
+        build_full_path(path, entry->d_name, full_path);
+
+        process_path(full_path, dir_stack, stack_top, output);
+    }
+    closedir(dir);
+}
+
+void process_directory_recursively(const char* current_dir, FILE* output_file) {
+    char* directories[MAX_DIRECTORIES];
+    int top = 0;
+    directories[top++] = strdup(current_dir);
+
+    while (top > 0) {
+        char* current_path = directories[--top];
+        process_single_directory(current_path, directories, &top, output_file);
+        free(current_path);
+    }
+}
 
 void iterate_filesystem(const char* root_dir) {
     FILE* file = fopen("result.txt", "w");
@@ -332,41 +390,8 @@ void iterate_filesystem(const char* root_dir) {
         show_error_dialog("Can't open results file");
         return;
     }
-    DIR* dir;
-    struct dirent* entry;
 
-    char* directories[MAX_DIRECTORIES];
-    int top = 0;
-
-    directories[top++] = strdup(root_dir);
-
-    while (top > 0) {
-        char* current_dir = directories[--top];
-
-        dir = opendir(current_dir);
-        if (!dir) {
-            free(current_dir);
-            continue;
-        }
-
-        while ((entry = readdir(dir))) {
-            char path[MAX_PATH_LEN];
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
-
-            snprintf(path, MAX_PATH_LEN, "%s/%s", current_dir, entry->d_name);
-
-            struct stat st;
-            if (stat(path, &st) != 0) continue;
-
-            if (S_ISDIR(st.st_mode)) {
-                if (top < MAX_DIRECTORIES) directories[top++] = strdup(path);
-            } else {
-                process_file(path,file);
-            }
-        }
-        closedir(dir);
-        free(current_dir);
-    }
+    process_directory_recursively(root_dir, file);
     fclose(file);
 }
 
