@@ -241,7 +241,7 @@ void show_error_dialog(const char* message) {
 
 
 void show_create_object_dialog(ApplicationState* state) {
-    DialogResult result = show_dialog(DIALOG_INPUT, "Create Object", "Create File (F) or Directory (D)?");
+    DialogResult result = show_dialog(DIALOG_INPUT, "Create Object", "Create File (F),Symlink (S) or Dir. (D)?");
 
     if (!result.confirmed) return;
 
@@ -291,8 +291,39 @@ void show_create_object_dialog(ApplicationState* state) {
             break;
         }
 
+        case 's':{
+           	DialogResult name_symlink = show_dialog(DIALOG_INPUT, "Create Symlink", "Enter symlink name:");
+            if (!name_symlink.confirmed || strlen(name_symlink.input) == 0) {
+                show_error_dialog("Name cannot be empty.");
+                return;
+            }
+
+            DialogResult file_path = show_dialog(DIALOG_INPUT, "Create File", "Enter file path:");
+            if (!file_path.confirmed || strlen(file_path.input) == 0) {
+              show_error_dialog("Path cannot be empty.");
+              return;
+            }
+
+            char* full_path_symlink = get_full_path(state, name_symlink.input);
+            char* full_path_file = get_full_path(state, file_path.input);
+
+
+            if (symlink(full_path_file, full_path_symlink) != 0) {
+                show_error_dialog("Failed to create symlink.");
+                free(full_path_symlink);
+                free(full_path_file);
+                return;
+            }
+
+            load_directory(tab);
+            show_dialog(DIALOG_ERROR, "Success", "Symlink created successfully!");
+            free(full_path_symlink);
+            free(full_path_file);
+            break;
+         break;
+        }
         default:
-            show_error_dialog("Invalid choice. Press 'F' for File or 'D' for Directory.");
+            show_error_dialog("Invalid choice. 'F' for File, 'S' for syml. or 'D' for Dir.");
         break;
     }
 }
@@ -566,7 +597,3 @@ void show_system_stat_dialog(const ApplicationState *state) {
     wgetch(win);
     delwin(win);
 }
-
-
-
-
